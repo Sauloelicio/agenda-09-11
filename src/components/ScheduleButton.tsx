@@ -82,9 +82,16 @@ Te esperamos no horário marcado! 💛🤍`;
       });
 
       // Redirecionamento direto (mais confiável que window.open)
-      setTimeout(() => {
-        window.location.href = whatsappUrl;
-      }, 500);
+      // Abre em nova aba (wa.me recusa abrir dentro de iframes)
+      const win = window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      if (!win) {
+        try {
+          (window.top ?? window).location.href = whatsappUrl;
+        } catch {
+          window.location.href = whatsappUrl;
+        }
+      }
+      setIsRedirecting(false);
       
     } catch (error) {
       toast({

@@ -50,7 +50,10 @@ export const RescheduleDialog = () => {
     if (error) return fail(error.message);
     bumpSlots();
     const msg = `🔄 Horário alterado!\n\nOlá, ${appt.client_name}!\nSeu atendimento na laryssaresende.nails foi remarcado.\n\n❌ Antes: ${fmt(appt.date)} às ${appt.time}\n📆 Nova data: ${fmt(newDate)}\n⏰ Novo horário: ${time}\n💛 Serviço: ${appt.service}\n\nTe esperamos! 💛🤍`;
-    window.location.href = `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`;
+    const url = `https://wa.me/${WHATS}?text=${encodeURIComponent(msg)}`;
+    if (!window.open(url, "_blank", "noopener,noreferrer")) {
+      try { (window.top ?? window).location.href = url; } catch { window.location.href = url; }
+    }
   };
 
   const cancel = async () => {
