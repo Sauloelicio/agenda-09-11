@@ -11,6 +11,7 @@ import { ptBR } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Lock, LogOut, Trash2, ArrowLeft } from 'lucide-react';
+import { BusinessSettings, DEFAULT_SETTINGS, generateSlots, toMin } from '@/lib/slots';
 
 const ADMIN_EMAIL = 'dona@juliananailsdesign.app';
 
@@ -51,6 +52,59 @@ const Login = ({ onDone }: { onDone: () => void }) => {
         </form>
       </CardContent>
     </Card>
+  );
+};
+
+const DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+const HoursTab = () => {
+  const [s, setS] = useState<BusinessSettings>(DEFAULT_SETTINGS);
+  useEffect(() => {
+    supabase.from('business_settings').select('*').eq('id', 1).maybeSingle()
+      .then(({ data }) => data && setS(data as BusinessSettings));
+  }, []);
+  const set = (k: keyof BusinessSettings, v: unknown) => setS((p) => ({ ...p, [k]: v }));
+  const save = async () => {
+    if (toMin(s.close_time) <= toMin(s.open_time)) return toast.error('O fim deve ser depois do início');
+    const { error } = await supabase.from('business_settings').update({
+      open_time: s.open_time, close_time: s.close_time,
+      lunch_start: s.lunch_start || null, lunch_end: s.lunch_end || null,
+      service_minutes: Number(s.service_minutes), slot_interval_minutes: Number(s.slot_interval_minutes),
+      open_weekdays: s.open_weekdays, updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    error ? toast.error('Erro ao salvar') : toast.success('Horários salvos');
+  };
+  const field = (label: string, el: React.ReactNode) => (
+    <label className="space-y-1 text-sm"><span className="text-muted-foreground">{label}</span>{el}</label>
+  );
+  const preview = generateSlots({ ...s, open_weekdays: [1] }, new Date(2026, 10, 9));
+  return (
+    <Card><CardContent className="pt-6 space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        {field('Início do expediente', <Input type="time" value={s.open_time} onChange={(e) => set('open_time', e.target.value)} />)}
+        {field('Fim do expediente', <Input type="time" value={s.close_time} onChange={(e) => set('close_time', e.target.value)} />)}
+        {field('Almoço início', <Input type="time" value={s.lunch_start || ''} onChange={(e) => set('lunch_start', e.target.value)} />)}
+        {field('Almoço fim', <Input type="time" value={s.lunch_end || ''} onChange={(e) => set('lunch_end', e.target.value)} />)}
+        {field('Tempo de atendimento (min)', <Input type="number" min={5} value={s.service_minutes} onChange={(e) => set('service_minutes', e.target.value)} />)}
+        {field('Horário a cada (min)', <Input type="number" min={5} value={s.slot_interval_minutes} onChange={(e) => set('slot_interval_minutes', e.target.value)} />)}
+      </div>
+      <div className="space-y-2">
+        <span className="text-sm text-muted-foreground">Dias de atendimento</span>
+        <div className="flex flex-wrap gap-2">
+          {DAYS.map((d, i) => {
+            const on = s.open_weekdays.includes(i);
+            return (
+              <Button key={d} type="button" size="sm" variant={on ? 'default' : 'outline'}
+                onClick={() => set('open_weekdays', on ? s.open_weekdays.filter((x) => x !== i) : [...s.open_weekdays, i].sort())}>
+                {d}
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">Prévia: {preview.join(', ') || 'nenhum horário'}</p>
+      <Button className="w-full" onClick={save}>Salvar</Button>
+    </CardContent></Card>
   );
 };
 
@@ -96,10 +150,12 @@ const Dashboard = () => {
 
   return (
     <Tabs defaultValue="services" className="max-w-lg mx-auto">
-      <TabsList className="grid grid-cols-2 w-full">
+      <TabsList className="grid grid-cols-3 w-full">
         <TabsTrigger value="services">Serviços</TabsTrigger>
-        <TabsTrigger value="days">Dias bloqueados</TabsTrigger>
+        <TabsTrigger value="hours">Horários</TabsTrigger>
+        <TabsTrigger value="days">Bloqueios</TabsTrigger>
       </TabsList>
+      <TabsContent value="hours"><HoursTab /></TabsContent>
       <TabsContent value="services">
         <Card><CardContent className="pt-6 space-y-3">
           <div className="flex gap-2">

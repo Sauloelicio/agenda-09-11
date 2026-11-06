@@ -6,10 +6,12 @@ import { CalendarIcon } from "lucide-react";
 import { useSchedule } from '@/contexts/ScheduleContext';
 import { ptBR } from "date-fns/locale";
 import { format } from "date-fns";
+import { useBusinessSettings } from '@/hooks/use-business-settings';
 import { supabase } from '@/integrations/supabase/client';
 
 export const DateSelector = () => {
   const { scheduleData, setSelectedDate } = useSchedule();
+  const settings = useBusinessSettings();
   const [blocked, setBlocked] = React.useState<string[]>([]);
   React.useEffect(() => {
     supabase.from('blocked_dates').select('date').then(({ data }) => setBlocked((data || []).map((r) => r.date)));
@@ -31,7 +33,7 @@ export const DateSelector = () => {
             today.setHours(0, 0, 0, 0);
             const dayOfWeek = date.getDay();
             // Desabilita datas passadas e domingos (dia 0)
-            return date < today || dayOfWeek === 0 || blocked.includes(format(date, 'yyyy-MM-dd'));
+            return date < today || !settings.open_weekdays.includes(dayOfWeek) || blocked.includes(format(date, 'yyyy-MM-dd'));
           }}
           locale={ptBR}
           className="rounded-lg border border-border bg-card text-foreground scale-90 sm:scale-100"

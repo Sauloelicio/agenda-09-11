@@ -5,33 +5,17 @@ import { Label } from "@/components/ui/label";
 import { Clock } from "lucide-react";
 import { useSchedule } from '@/contexts/ScheduleContext';
 
-const getAvailableTimesForDate = (date: Date): string[] => {
-  const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Segunda, etc.
-  
-  // Domingo fechado
-  if (dayOfWeek === 0) {
-    return [];
-  }
-  
-  // Segunda a Sábado: 09:00 às 18:00, exceto intervalo de almoço 12:00-13:30
-  // Cada atendimento dura 1 hora
-  return [
-    "09:00", "10:00", "11:00",
-    // Almoço 12:00 - 13:30
-    "14:00", "15:00", "16:00", "17:00"
-  ];
-};
+import { useBusinessSettings } from '@/hooks/use-business-settings';
+import { generateSlots } from '@/lib/slots';
 
 export const TimeSelector = () => {
   const { scheduleData, setSelectedTime, getOccupiedTimes } = useSchedule();
+  const settings = useBusinessSettings();
   
-  const availableTimes = scheduleData.selectedDate ? getAvailableTimesForDate(scheduleData.selectedDate) : [];
+  const availableTimes = scheduleData.selectedDate ? generateSlots(settings, scheduleData.selectedDate) : [];
   const occupiedTimes = scheduleData.selectedDate ? getOccupiedTimes(scheduleData.selectedDate) : [];
   
-  const getDayStatus = (date: Date) => {
-    const dayOfWeek = date.getDay();
-    return dayOfWeek === 0 ? "Fechado" : "Aberto";
-  };
+  const getDayStatus = (date: Date) => settings.open_weekdays.includes(date.getDay()) ? "Aberto" : "Fechado";
 
   return (
     <div className="space-y-3">
