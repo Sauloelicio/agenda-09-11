@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          client_name: string
+          created_at: string
+          date: string
+          id: string
+          phone: string
+          service: string
+          status: string
+          time: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          date: string
+          id?: string
+          phone: string
+          service: string
+          status?: string
+          time: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          date?: string
+          id?: string
+          phone?: string
+          service?: string
+          status?: string
+          time?: string
+        }
+        Relationships: []
+      }
       blocked_dates: {
         Row: {
           created_at: string
@@ -116,12 +149,41 @@ export type Database = {
     }
     Functions: {
       admin_exists: { Args: never; Returns: boolean }
+      book_appointment: {
+        Args: {
+          _date: string
+          _name: string
+          _phone: string
+          _service: string
+          _time: string
+        }
+        Returns: string
+      }
+      cancel_appointment: {
+        Args: { _id: string; _phone: string }
+        Returns: undefined
+      }
+      find_my_appointment: {
+        Args: { _phone: string }
+        Returns: {
+          client_name: string
+          date: string
+          id: string
+          service: string
+          time: string
+        }[]
+      }
+      get_occupied_times: { Args: { _date: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      reschedule_appointment: {
+        Args: { _date: string; _id: string; _phone: string; _time: string }
+        Returns: undefined
       }
     }
     Enums: {

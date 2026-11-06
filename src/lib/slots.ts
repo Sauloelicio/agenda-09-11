@@ -39,3 +39,12 @@ export const generateSlots = (s: BusinessSettings, date: Date): string[] => {
   }
   return out;
 };
+
+const slotDate = (date: string, time: string) => new Date(`${date}T${time}:00`);
+
+/** True when the slot already started. */
+export const isPastSlot = (date: string, time: string, now: Date) => slotDate(date, time) <= now;
+
+/** Clients may reschedule/cancel only up to 2 hours before the appointment. */
+export const canClientChange = (date: string, time: string, now: Date) =>
+  slotDate(date, time).getTime() - now.getTime() >= 2 * 60 * 60 * 1000;

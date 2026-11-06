@@ -6,9 +6,10 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useSchedule } from '@/contexts/ScheduleContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const ScheduleButton = () => {
-  const { scheduleData } = useSchedule();
+  const { scheduleData, reset } = useSchedule();
   const [isRedirecting, setIsRedirecting] = useState(false);
   
   const isFormValid = scheduleData.clientName && 
@@ -39,7 +40,7 @@ Obrigada por escolher a laryssaresende.nails.
 Te esperamos no horário marcado! 💛🤍`;
   };
 
-  const handleSchedule = () => {
+  const handleSchedule = async () => {
     if (!isFormValid || !scheduleData.selectedDate) {
       toast({
         title: "Campos obrigatórios",
@@ -49,8 +50,27 @@ Te esperamos no horário marcado! 💛🤍`;
       return;
     }
 
+    setIsRedirecting(true);
+    const { error: bookErr } = await supabase.rpc('book_appointment', {
+      _name: scheduleData.clientName,
+      _phone: scheduleData.phoneNumber,
+      _service: scheduleData.selectedService,
+      _date: format(scheduleData.selectedDate, 'yyyy-MM-dd'),
+      _time: scheduleData.selectedTime,
+    });
+    if (bookErr) {
+      setIsRedirecting(false);
+      const taken = bookErr.message.includes('slot_taken');
+      if (taken) reset();
+      toast({
+        title: taken ? "Horário indisponível" : "Não foi possível agendar",
+        description: taken ? "Esse horário acabou de ser reservado. Escolha outro." : "Confira seu nome e telefone e tente de novo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      setIsRedirecting(true);
       const message = generateMessage();
       const encodedMessage = encodeURIComponent(message);
       const whatsappNumber = "557996737776";

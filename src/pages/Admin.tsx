@@ -11,6 +11,7 @@ import { ptBR } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Lock, LogOut, Trash2, ArrowLeft } from 'lucide-react';
+import { AppointmentsTab } from '@/components/AppointmentsTab';
 import { BusinessSettings, DEFAULT_SETTINGS, generateSlots, toMin } from '@/lib/slots';
 
 const ADMIN_EMAIL = 'dona@juliananailsdesign.app';
@@ -149,12 +150,14 @@ const Dashboard = () => {
   };
 
   return (
-    <Tabs defaultValue="services" className="max-w-lg mx-auto">
-      <TabsList className="grid grid-cols-3 w-full">
+    <Tabs defaultValue="appts" className="max-w-lg mx-auto">
+      <TabsList className="grid grid-cols-4 w-full">
+        <TabsTrigger value="appts">Agenda</TabsTrigger>
         <TabsTrigger value="services">Serviços</TabsTrigger>
         <TabsTrigger value="hours">Horários</TabsTrigger>
         <TabsTrigger value="days">Bloqueios</TabsTrigger>
       </TabsList>
+      <TabsContent value="appts"><AppointmentsTab /></TabsContent>
       <TabsContent value="hours"><HoursTab /></TabsContent>
       <TabsContent value="services">
         <Card><CardContent className="pt-6 space-y-3">

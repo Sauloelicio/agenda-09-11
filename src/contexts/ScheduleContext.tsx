@@ -16,19 +16,12 @@ interface ScheduleContextType {
   setSelectedDate: (date: Date | undefined) => void;
   setSelectedTime: (time: string) => void;
   setSelectedService: (service: string) => void;
-  getOccupiedTimes: (date: Date) => string[];
+  slotsVersion: number;
+  bumpSlots: () => void;
+  reset: () => void;
 }
 
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
-
-// Simulação de horários ocupados - em um app real, isso viria de uma API
-const occupiedSlots: { [key: string]: string[] } = {
-  '2024-06-24': ['09:10', '14:30', '16:30'],
-  '2024-06-25': ['10:30', '15:10'],
-  '2024-06-26': ['08:30', '11:50', '17:10'],
-  '2024-06-28': ['13:10', '18:30'],
-  '2024-06-29': ['09:50', '12:30', '19:10'],
-};
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [scheduleData, setScheduleData] = useState<ScheduleData>({
@@ -59,10 +52,9 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setScheduleData(prev => ({ ...prev, selectedService: service }));
   };
 
-  const getOccupiedTimes = (date: Date): string[] => {
-    const dateKey = date.toISOString().split('T')[0];
-    return occupiedSlots[dateKey] || [];
-  };
+  const [slotsVersion, setSlotsVersion] = useState(0);
+  const bumpSlots = () => setSlotsVersion(v => v + 1);
+  const reset = () => { setScheduleData(prev => ({ ...prev, selectedTime: '' })); bumpSlots(); };
 
   return (
     <ScheduleContext.Provider value={{
@@ -72,7 +64,9 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setSelectedDate,
       setSelectedTime,
       setSelectedService,
-      getOccupiedTimes,
+      slotsVersion,
+      bumpSlots,
+      reset,
     }}>
       {children}
     </ScheduleContext.Provider>
