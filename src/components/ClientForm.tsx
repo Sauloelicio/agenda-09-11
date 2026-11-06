@@ -6,17 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Phone, Sparkles } from "lucide-react";
 import { useSchedule } from '@/contexts/ScheduleContext';
 
-const services = [
-  "Unha postiças realista",
-  "Gel na tips",
-  "Fibra de vidro",
-  "Molde F1",
-  "Cílios",
-  "Sobrancelhas"
-];
+import { supabase } from '@/integrations/supabase/client';
 
 export const ClientForm = () => {
   const { scheduleData, setClientName, setPhoneNumber, setSelectedService } = useSchedule();
+  const [services, setServices] = React.useState<string[]>([]);
+  React.useEffect(() => {
+    supabase.from('services').select('name').eq('active', true).order('sort_order')
+      .then(({ data }) => setServices((data || []).map((s) => s.name)));
+  }, []);
 
   return (
     <div className="space-y-4">
