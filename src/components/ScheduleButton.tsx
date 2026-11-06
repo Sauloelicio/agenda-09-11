@@ -26,7 +26,7 @@ export const ScheduleButton = () => {
     return `✨ Agendamento Confirmado! ✨
 
 Olá, ${scheduleData.clientName}!
-Seu horário foi reservado com sucesso na JulianaNailsDesign 💅✨
+Seu horário foi reservado com sucesso na laryssaresende.nails 💅✨
 
 📆 Data: ${dayOfWeekName}, ${formattedDate}
 ⏰ Horário: ${scheduleData.selectedTime}
@@ -35,7 +35,7 @@ Seu horário foi reservado com sucesso na JulianaNailsDesign 💅✨
 Estamos felizes em te receber!
 Qualquer dúvida ou alteração, é só chamar aqui mesmo. 💬
 
-Obrigada por escolher a JulianaNailsDesign.
+Obrigada por escolher a laryssaresende.nails.
 Te esperamos no horário marcado! 💛🤍`;
   };
 
@@ -53,7 +53,7 @@ Te esperamos no horário marcado! 💛🤍`;
       setIsRedirecting(true);
       const message = generateMessage();
       const encodedMessage = encodeURIComponent(message);
-      const whatsappNumber = "5579988689607";
+      const whatsappNumber = "557996737776";
       const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
       
       toast({
@@ -92,7 +92,7 @@ Te esperamos no horário marcado! 💛🤍`;
       
       toast({
         title: "Mensagem copiada! 📋",
-        description: "Cole no WhatsApp: +55 79 98868-9607",
+        description: "Cole no WhatsApp: +55 79 9673-7776",
       });
     } catch (error) {
       toast({

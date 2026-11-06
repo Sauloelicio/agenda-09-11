@@ -41,7 +41,7 @@ export const ClientForm = () => {
           id="phone"
           value={scheduleData.phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
-          placeholder="(79) 98868-9607"
+          placeholder="(79) 9673-7776"
           className="bg-background border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
         />
       </div>

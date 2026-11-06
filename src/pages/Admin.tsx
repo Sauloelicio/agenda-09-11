@@ -42,7 +42,7 @@ const Login = ({ onDone }: { onDone: () => void }) => {
     <Card className="max-w-sm mx-auto mt-16">
       <CardHeader className="text-center">
         <Lock className="h-6 w-6 text-primary mx-auto" />
-        <CardTitle className="text-lg">{first ? 'Crie sua senha de acesso' : 'Área da Juliana'}</CardTitle>
+        <CardTitle className="text-lg">{first ? 'Crie sua senha de acesso' : 'Área da Laryssa'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-3">
@@ -152,7 +152,7 @@ const Admin = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary to-background px-4 py-6">
       <div className="max-w-lg mx-auto flex justify-between items-center mb-4">
         <Link to="/" className="text-sm text-muted-foreground flex items-center gap-1"><ArrowLeft className="h-4 w-4" />Site</Link>
-        <h1 className="font-semibold text-foreground">Painel JulianaNailsDesign</h1>
+        <h1 className="font-semibold text-foreground">Painel laryssaresende.nails</h1>
         {state === 'in' ? (
           <Button variant="ghost" size="icon" onClick={() => supabase.auth.signOut()}><LogOut className="h-4 w-4" /></Button>
         ) : <span className="w-9" />}
