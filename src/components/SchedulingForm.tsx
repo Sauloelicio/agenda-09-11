@@ -7,6 +7,7 @@ import { DateSelector } from './DateSelector';
 import { TimeSelector } from './TimeSelector';
 import { ScheduleSummary } from './ScheduleSummary';
 import { ScheduleButton } from './ScheduleButton';
+import { RescheduleDialog } from './RescheduleDialog';
 import { BusinessHours } from './BusinessHours';
 
 export const SchedulingForm = () => {
@@ -28,6 +29,7 @@ export const SchedulingForm = () => {
         <TimeSelector />
         <ScheduleSummary />
         <ScheduleButton />
+        <RescheduleDialog />
         <BusinessHours />
       </CardContent>
     </Card>
