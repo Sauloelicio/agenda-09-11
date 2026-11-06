@@ -17,3 +17,10 @@ describe('generateSlots', () => {
     expect(generateSlots(s, monday)).toEqual(['16:00', '16:40', '17:20']);
   });
 });
+
+import { canClientChange } from './slots';
+describe('canClientChange (2-hour rule)', () => {
+  const now = new Date(2026, 10, 9, 10, 0);
+  it('allows exactly 2 hours before', () => expect(canClientChange('2026-11-09', '12:00', now)).toBe(true));
+  it('blocks 1h59 before', () => expect(canClientChange('2026-11-09', '11:59', now)).toBe(false));
+});
