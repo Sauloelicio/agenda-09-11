@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      business_settings: {
+        Row: {
+          close_time: string
+          id: number
+          lunch_end: string | null
+          lunch_start: string | null
+          open_time: string
+          open_weekdays: number[]
+          service_minutes: number
+          slot_interval_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          close_time?: string
+          id?: number
+          lunch_end?: string | null
+          lunch_start?: string | null
+          open_time?: string
+          open_weekdays?: number[]
+          service_minutes?: number
+          slot_interval_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          close_time?: string
+          id?: number
+          lunch_end?: string | null
+          lunch_start?: string | null
+          open_time?: string
+          open_weekdays?: number[]
+          service_minutes?: number
+          slot_interval_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           active: boolean
