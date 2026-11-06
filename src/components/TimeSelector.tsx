@@ -5,15 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Clock } from "lucide-react";
 import { useSchedule } from '@/contexts/ScheduleContext';
 
-import { useBusinessSettings } from '@/hooks/use-business-settings';
-import { generateSlots } from '@/lib/slots';
+import { useAvailableTimes } from '@/hooks/use-available-times';
 
 export const TimeSelector = () => {
-  const { scheduleData, setSelectedTime, getOccupiedTimes } = useSchedule();
-  const settings = useBusinessSettings();
-  
-  const availableTimes = scheduleData.selectedDate ? generateSlots(settings, scheduleData.selectedDate) : [];
-  const occupiedTimes = scheduleData.selectedDate ? getOccupiedTimes(scheduleData.selectedDate) : [];
+  const { scheduleData, setSelectedTime, slotsVersion } = useSchedule();
+  const { times: availableTimes, settings } = useAvailableTimes(scheduleData.selectedDate, undefined, slotsVersion);
+  const occupiedTimes: string[] = [];
   
   const getDayStatus = (date: Date) => settings.open_weekdays.includes(date.getDay()) ? "Aberto" : "Fechado";
 
@@ -35,7 +32,7 @@ export const TimeSelector = () => {
         </div>
       ) : availableTimes.length === 0 ? (
         <div className="text-muted-foreground text-center py-6 text-sm">
-          Fechado neste dia
+          Sem horários livres neste dia
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
