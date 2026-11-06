@@ -83,7 +83,7 @@ Te esperamos no horário marcado! 💛🤍`;
 
       // Redirecionamento direto (mais confiável que window.open)
       // Abre em nova aba (wa.me recusa abrir dentro de iframes)
-      const win = window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      const win = window.open(whatsappUrl, "_blank");
       if (!win) {
         try {
           (window.top ?? window).location.href = whatsappUrl;
