@@ -22,6 +22,20 @@
       "when": 1794006417266,
       "tag": "0002_appointments",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794244857640,
+      "tag": "0003_multi_tenant_saas",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794244857641,
+      "tag": "0004_real_tenant_accounts",
+      "breakpoints": true
     }
   ]
 }

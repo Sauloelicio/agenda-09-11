@@ -73,7 +73,11 @@ const HoursTab = () => {
       service_minutes: Number(s.service_minutes), slot_interval_minutes: Number(s.slot_interval_minutes),
       open_weekdays: s.open_weekdays, updated_at: new Date().toISOString(),
     }).eq('id', 1);
-    error ? toast.error('Erro ao salvar') : toast.success('Horários salvos');
+    if (error) {
+      toast.error('Erro ao salvar');
+    } else {
+      toast.success('Horários salvos');
+    }
   };
   const field = (label: string, el: React.ReactNode) => (
     <label className="space-y-1 text-sm"><span className="text-muted-foreground">{label}</span>{el}</label>
