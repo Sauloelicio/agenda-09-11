@@ -238,7 +238,9 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
               </SelectTrigger>
               <SelectContent>
                 {tenants
-                  .filter((t) => demoMode || user?.ownedTenantIds.includes(t.id))
+                  .filter((t) => demoMode
+                    ? t.id.startsWith('tenant-')
+                    : user?.ownedTenantIds.includes(t.id))
                   .map((t) => (
                     <SelectItem key={t.id} value={t.id} className="text-xs">
                       {t.name}

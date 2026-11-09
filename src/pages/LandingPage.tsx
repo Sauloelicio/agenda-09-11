@@ -37,8 +37,7 @@ export const LandingPage = () => {
   };
 
   const handleGoAdmin = (slug: string) => {
-    // Redireciona para login — o ProtectedRoute cuida do redirecionamento pós-login
-    navigate('/login');
+    navigate(`/demo/admin/${slug}`);
   };
 
   return (
@@ -436,4 +435,3 @@ export const LandingPage = () => {
   );
 };
 export default LandingPage;
-

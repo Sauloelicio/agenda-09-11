@@ -9,6 +9,7 @@ import { AdminProtectedRoute, ProtectedRoute } from "@/components/ProtectedRoute
 import LandingPage from "./pages/LandingPage";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/AdminDashboard";
+import DemoAdminDashboard from "./pages/DemoAdminDashboard";
 import PublicBooking from "./pages/PublicBooking";
 import LoginPage from "./pages/LoginPage";
 import Index from "./pages/Index";
@@ -53,6 +54,9 @@ const App = () => (
                   </AdminProtectedRoute>
                 }
               />
+
+              {/* Painel demonstrativo com dados fictícios, separado das contas reais */}
+              <Route path="/demo/admin/:slug" element={<DemoAdminDashboard />} />
 
               {/* Legacy Single-Tenant reference */}
               <Route path="/legacy-nails" element={<Index />} />

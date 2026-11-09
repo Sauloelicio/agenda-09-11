@@ -131,6 +131,13 @@ export const PublicBooking = () => {
       return;
     }
 
+    if (localTenant?.id.startsWith('tenant-')) {
+      setRemoteWorkspace(null);
+      setRemotePageError(false);
+      setRemotePageLoading(false);
+      return;
+    }
+
     let active = true;
     setRemotePageLoading(true);
     loadPublicTenantPage(slug)
@@ -148,7 +155,7 @@ export const PublicBooking = () => {
         if (active) setRemotePageLoading(false);
       });
     return () => { active = false; };
-  }, [slug, loadPublicTenantPage]);
+  }, [slug, loadPublicTenantPage, localTenant?.id]);
 
   useEffect(() => {
     if (!tenant || selectedServiceId) return;
@@ -350,7 +357,7 @@ Te esperamos no horário marcado! 🤍`;
         <div className="container mx-auto px-4 py-6 relative max-w-xl">
           {/* Subtle lock link to admin panel */}
           <Link 
-            to="/admin" 
+            to={isRemoteTenant ? '/admin' : `/demo/admin/${tenant.slug}`}
             onClick={() => { if (!isRemoteTenant) setCurrentTenant(tenant); }}
             title="Acessar Painel Administrativo" 
             className="absolute right-4 top-4 p-2 text-muted-foreground/40 hover:text-foreground transition-colors"
