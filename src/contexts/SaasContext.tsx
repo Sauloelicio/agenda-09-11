@@ -115,6 +115,23 @@ const STORAGE_KEYS = {
   CURRENT_TENANT_ID: 'saas_current_tenant_id_v1',
 };
 
+const loadDemoData = <T extends { id: string }>(key: string, fixtures: T[]): T[] => {
+  try {
+    const saved = localStorage.getItem(key);
+    if (!saved) return fixtures;
+
+    const parsed: unknown = JSON.parse(saved);
+    if (!Array.isArray(parsed) || !parsed.every((item) => isRecord(item) && typeof item.id === 'string')) {
+      throw new Error(`Invalid saved demo data in ${key}`);
+    }
+
+    return [...new Map([...fixtures, ...parsed as T[]].map((item) => [item.id, item])).values()];
+  } catch (error) {
+    console.error(`Unable to restore saved demo data for ${key}; using fixtures instead.`, error);
+    return fixtures;
+  }
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -137,10 +154,7 @@ const SaasContext = createContext<SaasContextType | undefined>(undefined);
 
 export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
-  const [tenants, setTenants] = useState<Tenant[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.TENANTS);
-    return saved ? JSON.parse(saved) : INITIAL_TENANTS;
-  });
+  const [tenants, setTenants] = useState<Tenant[]>(() => loadDemoData(STORAGE_KEYS.TENANTS, INITIAL_TENANTS));
 
   const [currentTenant, setCurrentTenant] = useState<Tenant | null>(() => {
     const savedId = localStorage.getItem(STORAGE_KEYS.CURRENT_TENANT_ID);
@@ -148,20 +162,11 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return found || tenants[0] || null;
   });
 
-  const [allServices, setAllServices] = useState<Service[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SERVICES);
-    return saved ? JSON.parse(saved) : INITIAL_SERVICES;
-  });
+  const [allServices, setAllServices] = useState<Service[]>(() => loadDemoData(STORAGE_KEYS.SERVICES, INITIAL_SERVICES));
 
-  const [allProfessionals, setAllProfessionals] = useState<Professional[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFESSIONALS);
-    return saved ? JSON.parse(saved) : INITIAL_PROFESSIONALS;
-  });
+  const [allProfessionals, setAllProfessionals] = useState<Professional[]>(() => loadDemoData(STORAGE_KEYS.PROFESSIONALS, INITIAL_PROFESSIONALS));
 
-  const [allAppointments, setAllAppointments] = useState<Appointment[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.APPOINTMENTS);
-    return saved ? JSON.parse(saved) : INITIAL_APPOINTMENTS;
-  });
+  const [allAppointments, setAllAppointments] = useState<Appointment[]>(() => loadDemoData(STORAGE_KEYS.APPOINTMENTS, INITIAL_APPOINTMENTS));
   const [remoteTenantIds, setRemoteTenantIds] = useState<string[]>([]);
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
@@ -175,7 +180,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAllServices((previous) => previous.filter((item) => !oldRemoteIds.includes(item.tenant_id)));
       setAllProfessionals((previous) => previous.filter((item) => !oldRemoteIds.includes(item.tenant_id)));
       setAllAppointments((previous) => previous.filter((item) => !oldRemoteIds.includes(item.tenant_id)));
-      setRemoteTenantIds([]);
+      if (oldRemoteIds.length > 0) setRemoteTenantIds([]);
       setWorkspaceLoading(false);
       setWorkspaceError(null);
       setCurrentTenant((previous) => previous && !oldRemoteIds.includes(previous.id)
@@ -193,7 +198,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAllAppointments((previous) => previous.filter((item) => !oldRemoteIds.includes(item.tenant_id)));
       setWorkspaceLoading(false);
       setWorkspaceError(null);
-      setRemoteTenantIds([]);
+      if (oldRemoteIds.length > 0) setRemoteTenantIds([]);
       setCurrentTenant((previous) => previous && !oldRemoteIds.includes(previous.id) ? previous : null);
       return () => { active = false; };
     }

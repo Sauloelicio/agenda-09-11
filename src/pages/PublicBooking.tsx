@@ -125,6 +125,16 @@ export const PublicBooking = () => {
   const [lookupPhone, setLookupPhone] = useState('');
   const [isLookupOpen, setIsLookupOpen] = useState(false);
 
+  const tenantServices = (isRemoteTenant && remoteWorkspace?.tenant.id === tenant?.id
+    ? remoteWorkspace.services
+    : allServices.filter((service) => service.tenant_id === tenant?.id))
+    .filter((service) => service.active);
+  const tenantPros = (isRemoteTenant && remoteWorkspace?.tenant.id === tenant?.id
+    ? remoteWorkspace.professionals
+    : allPros.filter((professional) => professional.tenant_id === tenant?.id))
+    .filter((professional) => professional.active);
+  const selectedService = tenantServices.find((service) => service.id === selectedServiceId) ?? tenantServices[0];
+
   useEffect(() => {
     if (!slug) {
       setRemotePageLoading(false);
@@ -246,15 +256,6 @@ export const PublicBooking = () => {
       </div>
     );
   }
-
-  // Tenant specific data
-  const tenantServices = (isRemoteTenant && remoteWorkspace?.tenant.id === tenant.id
-    ? remoteWorkspace.services
-    : allServices.filter((s) => s.tenant_id === tenant.id)).filter((service) => service.active);
-  const tenantPros = (isRemoteTenant && remoteWorkspace?.tenant.id === tenant.id
-    ? remoteWorkspace.professionals
-    : allPros.filter((p) => p.tenant_id === tenant.id)).filter((professional) => professional.active);
-  const selectedService = tenantServices.find((s) => s.id === selectedServiceId) || tenantServices[0];
 
   // Compute available slots
   const availableSlots = isRemoteTenant
