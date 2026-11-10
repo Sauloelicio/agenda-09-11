@@ -12,15 +12,12 @@ import {
   ShieldCheck, 
   Scissors, 
   Dumbbell, 
-  HeartHandshake,
-  Star,
   Zap,
   Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSaas } from '@/contexts/SaasContext';
 
 export const LandingPage = () => {
@@ -61,14 +58,15 @@ export const LandingPage = () => {
             <a href="#planos" className="hover:text-foreground transition-colors">Planos</a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/login">Entrar na minha conta</Link>
             </Button>
-            <Button size="sm" className="shadow-md shadow-primary/25 font-semibold" asChild>
+            <Button size="sm" className="h-10 px-3 sm:px-4 shadow-md shadow-primary/25 font-semibold" asChild>
               <Link to="/onboarding">
-                Criar Conta Grátis (5 dias)
-                <ArrowRight className="ml-1.5 h-4 w-4" />
+                <span className="sm:hidden">Começar</span>
+                <span className="hidden sm:inline">Criar conta grátis</span>
+                <ArrowRight className="ml-1.5 hidden h-4 w-4 sm:block" />
               </Link>
             </Button>
           </div>
@@ -76,49 +74,94 @@ export const LandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-16 pb-20 md:pt-24 md:pb-28 border-b border-border/40">
+      <section className="relative overflow-hidden border-b border-border/40 bg-gradient-to-b from-primary/5 via-background to-background pt-8 pb-10 sm:pt-14 sm:pb-14 md:pt-20 md:pb-20">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
         
-        <div className="container mx-auto px-4 text-center max-w-4xl">
-          <Badge variant="outline" className="mb-6 px-3.5 py-1.5 border-primary/40 bg-primary/5 text-primary gap-1.5 text-xs font-semibold rounded-full shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            SaaS de Agendamento Inteligente & Multi-Nicho
-          </Badge>
+        <div className="container mx-auto grid max-w-6xl items-center gap-8 px-4 md:grid-cols-2 md:gap-12">
+          <div className="text-left">
+            <Badge variant="outline" className="mb-4 gap-1.5 rounded-full border-primary/40 bg-primary/5 px-3 py-1 text-[11px] font-semibold text-primary shadow-sm sm:text-xs">
+              <Sparkles className="h-3.5 w-3.5" />
+              Agenda online para o seu negócio
+            </Badge>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15] mb-6">
-            Automatize seus agendamentos e lote sua agenda pelo{' '}
-            <span className="bg-gradient-to-r from-emerald-500 via-teal-500 to-primary bg-clip-text text-transparent">
-              WhatsApp
-            </span>
-          </h1>
+            <h1 className="mb-4 max-w-xl text-3xl font-extrabold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-6xl">
+              Agenda em ordem.
+              <span className="mt-1 block bg-gradient-to-r from-amber-500 via-primary to-emerald-600 bg-clip-text text-transparent">
+                Mais tempo livre.
+              </span>
+            </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-            Feito para <strong>manicures, barbearias, academias com turmas e prestadores de serviços</strong>. 
-            Crie sua conta em 2 minutos, envie seu link personalizado e receba agendamentos no automático 24 horas por dia.
-          </p>
+            <p className="mb-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
+              Seu cliente escolhe o horário online. Você cuida do negócio.
+            </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto mb-10">
-            <Button size="lg" className="w-full sm:w-auto h-12 px-8 font-semibold text-base shadow-lg shadow-primary/25" asChild>
-              <Link to="/onboarding">
-                Começar Teste Grátis (5 dias)
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-6 text-base" asChild>
-              <a href="#demos">Ver Demonstrações</a>
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <Button size="lg" className="h-12 w-full px-6 text-base font-semibold shadow-lg shadow-primary/25 sm:w-auto" asChild>
+                <Link to="/onboarding">
+                  Criar agenda grátis
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <a href="#demos" className="self-center py-2 text-sm font-semibold text-primary underline-offset-4 hover:underline sm:self-auto sm:px-3">
+                Ver demonstração
+              </a>
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> 5 dias grátis
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600" /> Sem cartão de crédito
+              </span>
+            </div>
+            <p className="mt-4 text-xs text-muted-foreground">
+              Beleza <span className="px-1 text-primary">·</span> Saúde <span className="px-1 text-primary">·</span> Pets <span className="px-1 text-primary">·</span> Serviços
+            </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-muted-foreground font-medium">
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Sem cartão de crédito
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> 5 dias grátis de acesso total
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" /> Ativação imediata no WhatsApp
-            </span>
+          <div className="relative mx-auto w-full max-w-md md:max-w-lg">
+            <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-primary/10 blur-2xl" />
+            <Card className="overflow-hidden rounded-3xl border-border/70 bg-card/95 shadow-xl shadow-foreground/5">
+              <CardHeader className="flex-row items-center justify-between space-y-0 p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Agenda de hoje</CardTitle>
+                    <p className="mt-0.5 text-xs text-muted-foreground">Tudo em ordem, de um só lugar</p>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="rounded-full bg-emerald-500/10 text-emerald-700">
+                  8 horários
+                </Badge>
+              </CardHeader>
+              <CardContent className="space-y-3 px-4 pb-4 sm:px-5 sm:pb-5">
+                <div className="flex items-center gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-3">
+                  <span className="w-12 text-sm font-bold tabular-nums text-foreground">09:00</span>
+                  <span className="h-9 w-1 rounded-full bg-primary" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">Corte e finalização</p>
+                    <p className="text-xs text-muted-foreground">Com Ana • 45 min</p>
+                  </div>
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+                </div>
+                <div className="flex items-center gap-3 rounded-2xl border border-border/70 p-3">
+                  <span className="w-12 text-sm font-bold tabular-nums text-foreground">10:30</span>
+                  <span className="h-9 w-1 rounded-full bg-amber-400" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">Próximo horário</p>
+                    <p className="text-xs text-muted-foreground">Cliente confirmado</p>
+                  </div>
+                  <Clock className="h-5 w-5 shrink-0 text-muted-foreground" />
+                </div>
+                <div className="flex items-center justify-between border-t border-border/60 pt-3 text-xs">
+                  <span className="text-muted-foreground">Seu link pronto para compartilhar</span>
+                  <span className="font-semibold text-primary">agendou.app/voce</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -126,10 +169,10 @@ export const LandingPage = () => {
       {/* Live Demos Section */}
       <section id="demos" className="py-16 md:py-24 bg-muted/30 border-b border-border/40">
         <div className="container mx-auto px-4 max-w-6xl">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <Badge variant="secondary" className="mb-3">Demonstração Interativa</Badge>
-            <h2 className="text-3xl font-bold tracking-tight">Experimente como seu cliente ou como administrador</h2>
-            <p className="text-muted-foreground mt-2">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+            <Badge variant="secondary" className="mb-3">Demonstração interativa</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Veja como funciona</h2>
+            <p className="hidden sm:block text-muted-foreground mt-2">
               Veja como a experiência se adapta perfeitamente a cada segmento de mercado com dados reais pré-carregados.
             </p>
           </div>
@@ -145,7 +188,7 @@ export const LandingPage = () => {
                   Nicho: Estética & Unhas
                 </Badge>
                 <CardTitle className="text-xl mt-2">Laryssa Resende Nails</CardTitle>
-                <p className="text-xs text-muted-foreground">
+                <p className="hidden sm:block text-xs text-muted-foreground">
                   Atendimento individual (1:1), escolha de serviços detalhados (gel, fibra, postiça) e cálculo automático de duração.
                 </p>
               </CardHeader>
@@ -177,7 +220,7 @@ export const LandingPage = () => {
                   Nicho: Barbearia & Salão
                 </Badge>
                 <CardTitle className="text-xl mt-2">Barbearia Vintage Club</CardTitle>
-                <p className="text-xs text-muted-foreground">
+                <p className="hidden sm:block text-xs text-muted-foreground">
                   Múltiplos profissionais simultâneos (Carlos e Rodrigo), seleção de barbeiro favorito e combos de serviços.
                 </p>
               </CardHeader>
@@ -209,7 +252,7 @@ export const LandingPage = () => {
                   Nicho: Academia & Cross
                 </Badge>
                 <CardTitle className="text-xl mt-2">Iron Gym & Cross</CardTitle>
-                <p className="text-xs text-muted-foreground">
+                <p className="hidden sm:block text-xs text-muted-foreground">
                   Turmas coletivas com <strong>vagas limitadas</strong> (Spinning 15 vagas, Cross 18 vagas), instrutores e controle de lotação.
                 </p>
               </CardHeader>
@@ -237,20 +280,20 @@ export const LandingPage = () => {
       {/* How it solves problems */}
       <section id="recursos" className="py-16 md:py-24 border-b border-border/40">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-3xl font-bold tracking-tight">Tudo o que você precisa para gerenciar seus clientes</h2>
-            <p className="text-muted-foreground mt-2">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Mais tempo para cuidar do seu negócio</h2>
+            <p className="hidden sm:block text-muted-foreground mt-2">
               Elimine a perda de tempo respondendo mensagens no WhatsApp o dia inteiro para achar um horário vago.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 gap-5 sm:gap-8 lg:grid-cols-3">
             <div className="flex flex-col gap-3">
               <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
                 <Smartphone className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Link Próprio no WhatsApp</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Coloque o link na sua bio do Instagram e no WhatsApp Business. Seu cliente agenda sozinho em menos de 30 segundos.
               </p>
             </div>
@@ -260,7 +303,7 @@ export const LandingPage = () => {
                 <Clock className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Zero Conflito de Horários</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Horários ocupados desaparecem automaticamente. Intervalos de almoço e dias de folga são calculados na hora.
               </p>
             </div>
@@ -270,7 +313,7 @@ export const LandingPage = () => {
                 <Users className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Equipes ou Aulas Coletivas</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Controle múltiplos profissionais na mesma loja ou configure limites de alunos por horário para academias e estúdios.
               </p>
             </div>
@@ -280,7 +323,7 @@ export const LandingPage = () => {
                 <TrendingUp className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Relatório de Faturamento</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Acompanhe o faturamento previsto do mês, quantidade de atendimentos e serviços mais lucrativos da sua operação.
               </p>
             </div>
@@ -290,7 +333,7 @@ export const LandingPage = () => {
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Regra Anti-Cancelamento</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Trava automática de 2 horas para cancelamento ou remarcação pelo próprio cliente, evitando que você fique no prejuízo.
               </p>
             </div>
@@ -300,7 +343,7 @@ export const LandingPage = () => {
                 <Zap className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold">Pronto em 2 Minutos</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
                 Nosso onboarding em 3 passos configura seus horários, regras e serviços sem precisar de conhecimento técnico.
               </p>
             </div>
@@ -311,10 +354,10 @@ export const LandingPage = () => {
       {/* Pricing Section */}
       <section id="planos" className="py-16 md:py-24 bg-muted/20 border-b border-border/40">
         <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <Badge variant="secondary" className="mb-3">Preços Transparentes</Badge>
-            <h2 className="text-3xl font-bold tracking-tight">Planos simples para acelerar seu negócio</h2>
-            <p className="text-muted-foreground mt-2">
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+            <Badge variant="secondary" className="mb-3">Preços transparentes</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Um plano para cada momento</h2>
+            <p className="hidden sm:block text-muted-foreground mt-2">
               Comece com 5 dias gratuitos sem cartão. Escolha o plano depois de ver os agendamentos entrando.
             </p>
 

@@ -27,9 +27,12 @@ export const DemoBar = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Não exibir em rotas privadas (admin, login, onboarding)
-  const hiddenRoutes = ['/admin', '/login', '/onboarding'];
-  if (hiddenRoutes.some((r) => location.pathname.startsWith(r))) return null;
+  const isDemoBooking = tenants.some(
+    (tenant) =>
+      location.pathname === `/${tenant.slug}` ||
+      location.pathname === `/agendar/${tenant.slug}`,
+  );
+  if (!isDemoBooking) return null;
   if (isDismissed) return null;
 
   const goToTenant = (slug: string) => {
