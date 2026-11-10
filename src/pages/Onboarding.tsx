@@ -107,8 +107,10 @@ export const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, reloadOwnedTenants } = useAuth();
+  const isDemoMode = new URLSearchParams(location.search).get('demo') === '1';
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [isCreating, setIsCreating] = useState(false);
+  const [demoComplete, setDemoComplete] = useState(false);
   const draftCompletionStarted = useRef(false);
 
   // Form State
@@ -243,7 +245,8 @@ export const Onboarding = () => {
   }, [navigate, reloadOwnedTenants]);
 
   useEffect(() => {
-    if (!isAuthenticated
+    if (isDemoMode
+      || !isAuthenticated
       || new URLSearchParams(location.search).get('complete') !== '1'
       || draftCompletionStarted.current) return;
 
@@ -264,7 +267,7 @@ export const Onboarding = () => {
       toast.error('Os dados do cadastro não puderam ser recuperados. Preencha novamente.');
       navigate('/onboarding', { replace: true });
     }
-  }, [isAuthenticated, location.search, navigate, submitTenant]);
+  }, [isAuthenticated, isDemoMode, location.search, navigate, submitTenant]);
 
   const handleComplete = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,6 +298,11 @@ export const Onboarding = () => {
       first_service_capacity: Number(serviceCapacity) || 1,
     };
 
+    if (isDemoMode) {
+      setDemoComplete(true);
+      return;
+    }
+
     if (!isAuthenticated) {
       sessionStorage.setItem('onboarding_draft_v1', JSON.stringify(draft));
       navigate('/login?mode=register', { state: { from: '/onboarding?complete=1' } });
@@ -303,6 +311,52 @@ export const Onboarding = () => {
 
     await submitTenant(draft);
   };
+
+  if (demoComplete) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-muted/20 to-background px-3 py-8 sm:px-4">
+        <Card className="w-full max-w-lg border-border/80 shadow-2xl">
+          <CardHeader className="text-center">
+            <Badge variant="secondary" className="mx-auto">MODO DEMONSTRAÇÃO</Badge>
+            <CardTitle className="text-2xl">Configuração demonstrativa concluída</CardTitle>
+            <CardDescription>
+              Seus dados foram usados apenas nesta prévia e não foram enviados nem salvos.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3 rounded-xl border border-border bg-muted/20 p-4 text-sm">
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Negócio</span>
+                <span className="text-right font-medium">{name.trim()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Segmento</span>
+                <span className="text-right font-medium">{SEGMENTS.find((item) => item.id === segment)?.title}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Serviço</span>
+                <span className="text-right font-medium">{serviceName.trim()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Preço demonstrativo</span>
+                <span className="text-right font-medium">{formatPrice(Number(servicePrice) || 0)}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Link (não reservado)</span>
+                <span className="break-all text-right font-medium">agendou.app/{slug}</span>
+              </div>
+            </div>
+            <Button className="w-full" onClick={() => setDemoComplete(false)}>
+              Voltar e editar a demonstração
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Para criar uma agenda real, é necessário conectar o banco de dados e concluir o cadastro.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-background via-muted/20 to-background px-3 py-6 sm:px-4 sm:py-10">
@@ -316,10 +370,19 @@ export const Onboarding = () => {
             </Link>
           </Button>
 
-          <Badge variant="outline" className="border-primary/30 px-3 py-1 font-semibold text-xs text-primary">
-            Passo {step} de 4 <span className="ml-1 text-muted-foreground">· {progressPercent}%</span>
-          </Badge>
+          <div className="flex items-center gap-2">
+            {isDemoMode && <Badge variant="secondary" className="text-[9px]">DEMO</Badge>}
+            <Badge variant="outline" className="border-primary/30 px-3 py-1 font-semibold text-xs text-primary">
+              Passo {step} de 4 <span className="ml-1 text-muted-foreground">· {progressPercent}%</span>
+            </Badge>
+          </div>
         </div>
+
+        {isDemoMode && (
+          <p className="mb-4 rounded-lg border border-border bg-muted/40 px-3 py-2 text-center text-xs text-muted-foreground">
+            Modo demonstração: você pode testar o fluxo; nenhum dado será salvo.
+          </p>
+        )}
 
         {/* Progress Bar */}
         <div
@@ -420,20 +483,30 @@ export const Onboarding = () => {
             {/* STEP 2: Segment selection */}
             {step === 2 && (
               <div className="space-y-4">
-                <div className="grid gap-3">
+                <div className="grid gap-3" role="radiogroup" aria-label="Segmento do negócio">
                   {SEGMENTS.map((item) => {
                     const isSelected = segment === item.id;
                     const Icon = item.icon;
+                    const inputId = `segment-${item.id}`;
                     return (
-                      <div
+                      <label
                         key={item.id}
-                        onClick={() => handleSelectSegment(item.id)}
-                        className={`p-4 rounded-xl border-2 cursor-pointer transition-all flex items-start gap-3.5 ${
+                        htmlFor={inputId}
+                        className={`flex cursor-pointer items-start gap-3.5 rounded-xl border-2 p-4 transition-all focus-within:ring-2 focus-within:ring-primary ${
                           isSelected
                             ? 'border-primary bg-primary/5 shadow-sm'
                             : 'border-border hover:border-border/80 hover:bg-muted/40'
                         }`}
                       >
+                        <input
+                          id={inputId}
+                          className="sr-only"
+                          type="radio"
+                          name="business-segment"
+                          value={item.id}
+                          checked={isSelected}
+                          onChange={() => handleSelectSegment(item.id)}
+                        />
                         <div className={`p-2.5 rounded-lg shrink-0 ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                           <Icon className="h-5 w-5" />
                         </div>
@@ -444,12 +517,12 @@ export const Onboarding = () => {
                           </div>
                           <p className="text-xs text-muted-foreground mt-1 leading-snug">{item.desc}</p>
                         </div>
-                        {isSelected && (
-                          <div className="h-5 w-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                        <span className="h-5 w-5 shrink-0 rounded-full bg-primary text-primary-foreground flex items-center justify-center" aria-hidden={!isSelected}>
+                          {isSelected && (
                             <Check className="h-3 w-3 stroke-[3]" />
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </span>
+                      </label>
                     );
                   })}
                 </div>
@@ -861,10 +934,10 @@ export const Onboarding = () => {
                   <Button type="submit" className="h-11 w-full min-w-0 font-bold shadow-lg shadow-primary/20 sm:flex-1" disabled={isCreating}>
                     <CheckCircle className="mr-2 h-4 w-4" />
                     <span className="sm:hidden">
-                      {isCreating ? 'Criando...' : isAuthenticated ? 'Criar agenda' : 'Continuar'}
+                      {isDemoMode ? 'Concluir demo' : isCreating ? 'Criando...' : isAuthenticated ? 'Criar agenda' : 'Continuar'}
                     </span>
                     <span className="hidden sm:inline">
-                      {isCreating ? 'Criando sua agenda...' : isAuthenticated ? 'Concluir e Abrir Painel' : 'Continuar e Criar Conta'}
+                      {isDemoMode ? 'Concluir demonstração' : isCreating ? 'Criando sua agenda...' : isAuthenticated ? 'Concluir e Abrir Painel' : 'Continuar e Criar Conta'}
                     </span>
                   </Button>
                 </div>
