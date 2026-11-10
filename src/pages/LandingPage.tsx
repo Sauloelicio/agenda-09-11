@@ -59,30 +59,30 @@ export const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20">
+    <div className="flex min-h-screen flex-col bg-[#171613] text-[#f5f1e8] selection:bg-[#c5a572]/30">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border/60">
+      <header className="sticky top-0 z-50 border-b border-[#3b352b] bg-[#171613]/95 text-[#f5f1e8] backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-md shadow-primary/20">
+            <div className="h-9 w-9 rounded-xl bg-[#c5a572] flex items-center justify-center text-[#211e1b] shadow-md shadow-black/20">
               <Calendar className="h-5 w-5" />
             </div>
-            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-foreground via-foreground/90 to-primary bg-clip-text text-transparent">
-              Agendou<span className="text-primary font-black">.SaaS</span>
+            <span className="font-bold text-xl tracking-tight text-[#f5f1e8]">
+              Agendou<span className="font-black text-[#d8bd90]">.SaaS</span>
             </span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#demos" className="hover:text-foreground transition-colors">Demonstrações</a>
-            <a href="#recursos" className="hover:text-foreground transition-colors">Recursos</a>
-            <a href="#planos" className="hover:text-foreground transition-colors">Planos</a>
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-white/60">
+            <a href="#demos" className="hover:text-[#e2c89c] transition-colors">Demonstrações</a>
+            <a href="#recursos" className="hover:text-[#e2c89c] transition-colors">Recursos</a>
+            <a href="#planos" className="hover:text-[#e2c89c] transition-colors">Planos</a>
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
+            <Button variant="ghost" size="sm" asChild className="hidden text-white/75 hover:bg-white/10 hover:text-white sm:inline-flex">
               <Link to="/login">Entrar na minha conta</Link>
             </Button>
-            <Button size="sm" className="h-10 px-3 sm:px-4 shadow-md shadow-primary/25 font-semibold" asChild>
+            <Button size="sm" className="h-10 bg-[#c5a572] px-3 font-semibold text-[#211e1b] shadow-md shadow-black/20 hover:bg-[#d4b989] sm:px-4" asChild>
               <Link to="/onboarding">
                 <span className="sm:hidden">Começar</span>
                 <span className="hidden sm:inline">Criar conta grátis</span>
@@ -260,12 +260,12 @@ export const LandingPage = () => {
       </section>
 
       {/* Live Demos Section */}
-      <section id="demos" className="py-16 md:py-24 bg-muted/30 border-b border-border/40">
+      <section id="demos" className="border-b border-[#3b352b] bg-[#1d1b17] py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
-            <Badge variant="secondary" className="mb-3">Escolha uma experiência</Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Veja o Agendou no seu segmento</h2>
-            <p className="hidden sm:block text-muted-foreground mt-2">
+            <Badge variant="outline" className="mb-3 border-[#c5a572]/40 bg-[#c5a572]/10 text-[#e2c89c]">Escolha uma experiência</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#f5f1e8]">Veja o Agendou no seu segmento</h2>
+            <p className="hidden sm:block text-white/60 mt-2">
               Explore demonstrações interativas com dados fictícios e descubra como cada agenda pode funcionar.
             </p>
           </div>
@@ -277,20 +277,20 @@ export const LandingPage = () => {
             className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:p-0"
           >
             {/* Manicure Demo */}
-            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-border/80 transition-all hover:border-pink-500/50 hover:shadow-lg md:w-auto">
+            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-[#454036] bg-[#26231e] text-[#f5f1e8] transition-all hover:border-pink-500/60 hover:shadow-lg md:w-auto">
               <CardHeader>
                 <div className="h-10 w-10 rounded-lg bg-pink-500/10 text-pink-500 flex items-center justify-center mb-3">
                   <Sparkles className="h-5 w-5" />
                 </div>
-                <Badge variant="outline" className="w-fit text-pink-600 border-pink-200 bg-pink-50 text-[10px] uppercase font-bold tracking-wider">
+                <Badge variant="outline" className="w-fit border-pink-400/30 bg-pink-500/10 text-[10px] font-bold uppercase tracking-wider text-pink-200">
                   Nicho: Estética & Unhas
                 </Badge>
-                <CardTitle className="text-xl mt-2">Laryssa Resende Nails</CardTitle>
-                <p className="hidden sm:block text-xs text-muted-foreground">
+                <CardTitle className="text-xl mt-2 text-[#f5f1e8]">Laryssa Resende Nails</CardTitle>
+                <p className="hidden sm:block text-xs text-white/55">
                   Atendimento individual (1:1), escolha de serviços detalhados (gel, fibra, postiça) e cálculo automático de duração.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-2 pt-2 border-t border-border/50">
+              <CardContent className="space-y-2 border-t border-white/10 pt-2">
                 <Button 
                   onClick={() => handleTestDemo('laryssa-nails')}
                   className="w-full bg-pink-600 hover:bg-pink-700 text-white font-medium"
@@ -301,7 +301,7 @@ export const LandingPage = () => {
                 <Button 
                   onClick={() => handleGoAdmin('laryssa-nails')}
                   variant="outline" 
-                  className="w-full text-xs"
+                  className="w-full border-white/20 bg-transparent text-xs text-white/80 hover:bg-white/10 hover:text-white"
                 >
                   Ver Painel da Dona
                 </Button>
@@ -309,20 +309,20 @@ export const LandingPage = () => {
             </Card>
 
             {/* Barber Demo */}
-            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-border/80 transition-all hover:border-amber-500/50 hover:shadow-lg md:w-auto">
+            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-[#454036] bg-[#26231e] text-[#f5f1e8] transition-all hover:border-amber-500/60 hover:shadow-lg md:w-auto">
               <CardHeader>
                 <div className="h-10 w-10 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center mb-3">
                   <Scissors className="h-5 w-5" />
                 </div>
-                <Badge variant="outline" className="w-fit text-amber-600 border-amber-200 bg-amber-50 text-[10px] uppercase font-bold tracking-wider">
+                <Badge variant="outline" className="w-fit border-amber-400/30 bg-amber-500/10 text-[10px] font-bold uppercase tracking-wider text-amber-200">
                   Nicho: Barbearia & Salão
                 </Badge>
-                <CardTitle className="text-xl mt-2">Barbearia Vintage Club</CardTitle>
-                <p className="hidden sm:block text-xs text-muted-foreground">
+                <CardTitle className="text-xl mt-2 text-[#f5f1e8]">Barbearia Vintage Club</CardTitle>
+                <p className="hidden sm:block text-xs text-white/55">
                   Múltiplos profissionais simultâneos (Carlos e Rodrigo), seleção de barbeiro favorito e combos de serviços.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-2 pt-2 border-t border-border/50">
+              <CardContent className="space-y-2 border-t border-white/10 pt-2">
                 <Button 
                   onClick={() => handleTestDemo('barbearia-vintage')}
                   className="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium"
@@ -333,7 +333,7 @@ export const LandingPage = () => {
                 <Button 
                   onClick={() => handleGoAdmin('barbearia-vintage')}
                   variant="outline" 
-                  className="w-full text-xs"
+                  className="w-full border-white/20 bg-transparent text-xs text-white/80 hover:bg-white/10 hover:text-white"
                 >
                   Ver Painel da Barbearia
                 </Button>
@@ -341,20 +341,20 @@ export const LandingPage = () => {
             </Card>
 
             {/* Gym Demo */}
-            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-border/80 transition-all hover:border-blue-500/50 hover:shadow-lg md:w-auto">
+            <Card data-demo-card className="w-[min(88vw,22rem)] shrink-0 snap-center border-[#454036] bg-[#26231e] text-[#f5f1e8] transition-all hover:border-blue-500/60 hover:shadow-lg md:w-auto">
               <CardHeader>
                 <div className="h-10 w-10 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center mb-3">
                   <Dumbbell className="h-5 w-5" />
                 </div>
-                <Badge variant="outline" className="w-fit text-blue-600 border-blue-200 bg-blue-50 text-[10px] uppercase font-bold tracking-wider">
+                <Badge variant="outline" className="w-fit border-blue-400/30 bg-blue-500/10 text-[10px] font-bold uppercase tracking-wider text-blue-200">
                   Nicho: Academia & Cross
                 </Badge>
-                <CardTitle className="text-xl mt-2">Iron Gym & Cross</CardTitle>
-                <p className="hidden sm:block text-xs text-muted-foreground">
+                <CardTitle className="text-xl mt-2 text-[#f5f1e8]">Iron Gym & Cross</CardTitle>
+                <p className="hidden sm:block text-xs text-white/55">
                   Turmas coletivas com <strong>vagas limitadas</strong> (Spinning 15 vagas, Cross 18 vagas), instrutores e controle de lotação.
                 </p>
               </CardHeader>
-              <CardContent className="space-y-2 pt-2 border-t border-border/50">
+              <CardContent className="space-y-2 border-t border-white/10 pt-2">
                 <Button 
                   onClick={() => handleTestDemo('iron-gym')}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
@@ -365,7 +365,7 @@ export const LandingPage = () => {
                 <Button 
                   onClick={() => handleGoAdmin('iron-gym')}
                   variant="outline" 
-                  className="w-full text-xs"
+                  className="w-full border-white/20 bg-transparent text-xs text-white/80 hover:bg-white/10 hover:text-white"
                 >
                   Ver Painel da Academia
                 </Button>
@@ -381,82 +381,82 @@ export const LandingPage = () => {
                   aria-label={`Ver demonstração ${index + 1} de 3`}
                   aria-current={activeDemoCard === index ? 'true' : undefined}
                   onClick={() => selectDemoCard(index)}
-                  className={`h-2.5 rounded-full transition-all ${activeDemoCard === index ? 'w-7 bg-primary' : 'w-2.5 bg-border'}`}
+                  className={`h-2.5 rounded-full transition-all ${activeDemoCard === index ? 'w-7 bg-[#c5a572]' : 'w-2.5 bg-white/25'}`}
                 />
               ))}
             </div>
-            <span className="text-xs text-muted-foreground">Deslize para explorar</span>
+            <span className="text-xs text-white/50">Deslize para explorar</span>
           </div>
         </div>
       </section>
 
       {/* How it solves problems */}
-      <section id="recursos" className="py-16 md:py-24 border-b border-border/40">
+      <section id="recursos" className="border-b border-[#3b352b] bg-[#171613] py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Mais tempo para cuidar do seu negócio</h2>
-            <p className="hidden sm:block text-muted-foreground mt-2">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#f5f1e8]">Mais tempo para cuidar do seu negócio</h2>
+            <p className="hidden sm:block text-white/60 mt-2">
               Elimine a perda de tempo respondendo mensagens no WhatsApp o dia inteiro para achar um horário vago.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-5 sm:gap-8 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <Smartphone className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Link Próprio no WhatsApp</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Link Próprio no WhatsApp</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Coloque o link na sua bio do Instagram e no WhatsApp Business. Seu cliente agenda sozinho em menos de 30 segundos.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <Clock className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Zero Conflito de Horários</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Zero Conflito de Horários</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Horários ocupados desaparecem automaticamente. Intervalos de almoço e dias de folga são calculados na hora.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <Users className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Equipes ou Aulas Coletivas</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Equipes ou Aulas Coletivas</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Controle múltiplos profissionais na mesma loja ou configure limites de alunos por horário para academias e estúdios.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <TrendingUp className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Relatório de Faturamento</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Relatório de Faturamento</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Acompanhe o faturamento previsto do mês, quantidade de atendimentos e serviços mais lucrativos da sua operação.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <ShieldCheck className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Regra Anti-Cancelamento</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Regra Anti-Cancelamento</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Trava automática de 2 horas para cancelamento ou remarcação pelo próprio cliente, evitando que você fique no prejuízo.
               </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[#c5a572]/20 bg-[#c5a572]/10 font-bold text-[#d8bd90]">
                 <Zap className="h-6 w-6" />
               </div>
-              <h3 className="text-lg font-semibold">Pronto em 2 Minutos</h3>
-              <p className="hidden sm:block text-sm text-muted-foreground leading-relaxed">
+              <h3 className="text-base font-semibold text-[#f5f1e8] sm:text-lg">Pronto em 2 Minutos</h3>
+              <p className="hidden sm:block text-sm leading-relaxed text-white/55">
                 Nosso onboarding em 3 passos configura seus horários, regras e serviços sem precisar de conhecimento técnico.
               </p>
             </div>
@@ -465,110 +465,112 @@ export const LandingPage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="planos" className="py-16 md:py-24 bg-muted/20 border-b border-border/40">
+      <section id="planos" className="border-b border-[#3b352b] bg-[#1d1b17] py-12 sm:py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-5xl">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-            <Badge variant="secondary" className="mb-3">Preços transparentes</Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Um plano para cada momento</h2>
-            <p className="hidden sm:block text-muted-foreground mt-2">
+            <Badge variant="outline" className="mb-3 border-[#c5a572]/40 bg-[#c5a572]/10 text-[#e2c89c]">Preços transparentes</Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#f5f1e8]">Um plano para cada momento</h2>
+            <p className="hidden sm:block text-white/60 mt-2">
               Comece com 5 dias gratuitos sem cartão. Escolha o plano depois de ver os agendamentos entrando.
             </p>
 
             {/* Billing toggle */}
             <div className="flex items-center justify-center gap-3 mt-6">
-              <span className={`text-sm ${billingCycle === 'monthly' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
+              <span className={`text-sm ${billingCycle === 'monthly' ? 'font-bold text-[#f5f1e8]' : 'text-white/50'}`}>
                 Mensal
               </span>
               <button
                 type="button"
                 onClick={() => setBillingCycle(c => c === 'monthly' ? 'yearly' : 'monthly')}
-                className="w-12 h-6 rounded-full bg-primary p-1 relative transition-colors focus:outline-none"
+                aria-label="Alternar cobrança mensal ou anual"
+                aria-pressed={billingCycle === 'yearly'}
+                className="relative h-6 w-12 rounded-full bg-[#8d774f] p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8bd90]"
               >
-                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-0'}`} />
+                <div className={`h-4 w-4 rounded-full bg-[#f5f1e8] transition-transform ${billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-0'}`} />
               </button>
-              <span className={`text-sm flex items-center gap-1.5 ${billingCycle === 'yearly' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
-                Anual <Badge variant="secondary" className="text-xs bg-emerald-500/10 text-emerald-600 border-none font-bold">2 meses grátis</Badge>
+              <span className={`flex items-center gap-1.5 text-sm ${billingCycle === 'yearly' ? 'font-bold text-[#f5f1e8]' : 'text-white/50'}`}>
+                Anual <Badge variant="outline" className="border-emerald-400/20 bg-emerald-400/10 text-xs font-bold text-emerald-300">2 meses grátis</Badge>
               </span>
             </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 items-stretch">
             {/* Basic Plan */}
-            <Card className="flex flex-col justify-between border-border/80 hover:shadow-md transition-shadow">
+            <Card className="flex flex-col justify-between border-[#454036] bg-[#26231e] text-[#f5f1e8] transition-shadow hover:shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">Básico / Solo</CardTitle>
-                <p className="text-xs text-muted-foreground">Para profissionais autônomos e manicures.</p>
+                <CardTitle className="text-xl text-[#f5f1e8]">Básico / Solo</CardTitle>
+                <p className="text-xs text-white/55">Para profissionais autônomos e manicures.</p>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-foreground">
+                  <span className="text-3xl font-extrabold text-[#f5f1e8]">
                     R$ {billingCycle === 'monthly' ? '49' : '39'}
                   </span>
-                  <span className="text-xs text-muted-foreground">/mês</span>
+                  <span className="text-xs text-white/50">/mês</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Agendamentos ilimitados</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> 1 Profissional / Agenda única</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Link próprio personalizado</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Confirmação no WhatsApp</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Painel de Faturamento</li>
+                <ul className="space-y-2.5 text-xs text-white/65">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Agendamentos ilimitados</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> 1 Profissional / Agenda única</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Link próprio personalizado</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Confirmação no WhatsApp</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Painel de Faturamento</li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline" asChild>
+                <Button className="mt-6 w-full border-white/20 bg-transparent text-white/80 hover:bg-white/10 hover:text-white" variant="outline" asChild>
                   <Link to="/onboarding">Criar Conta Grátis (5 dias)</Link>
                 </Button>
               </CardContent>
             </Card>
 
             {/* Pro Plan (Highlighted) */}
-            <Card className="flex flex-col justify-between border-primary shadow-xl shadow-primary/10 relative overflow-hidden bg-card">
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">
+            <Card className="relative flex flex-col justify-between overflow-hidden border-[#c5a572]/60 bg-[#302a20] text-[#f5f1e8] shadow-xl shadow-black/30">
+              <div className="absolute top-0 right-0 rounded-bl-lg bg-[#c5a572] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#211e1b]">
                 Mais Escolhido
               </div>
               <CardHeader>
-                <CardTitle className="text-xl">Profissional / Salão</CardTitle>
-                <p className="text-xs text-muted-foreground">Para barbearias, estúdios e equipes.</p>
+                <CardTitle className="text-xl text-[#f5f1e8]">Profissional / Salão</CardTitle>
+                <p className="text-xs text-white/55">Para barbearias, estúdios e equipes.</p>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-foreground">
+                  <span className="text-3xl font-extrabold text-[#f5f1e8]">
                     R$ {billingCycle === 'monthly' ? '89' : '72'}
                   </span>
-                  <span className="text-xs text-muted-foreground">/mês</span>
+                  <span className="text-xs text-white/50">/mês</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Tudo do plano Básico</li>
-                  <li className="flex items-center gap-2 font-medium text-foreground"><Check className="h-4 w-4 text-emerald-500" /> Até 5 profissionais simultâneos</li>
-                  <li className="flex items-center gap-2 font-medium text-foreground"><Check className="h-4 w-4 text-emerald-500" /> Escolha de atendente pelo cliente</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Relatórios de comissão por atendente</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Suporte prioritário via WhatsApp</li>
+                <ul className="space-y-2.5 text-xs text-white/65">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Tudo do plano Básico</li>
+                  <li className="flex items-center gap-2 font-medium text-[#f5f1e8]"><Check className="h-4 w-4 text-[#d8bd90]" /> Até 5 profissionais simultâneos</li>
+                  <li className="flex items-center gap-2 font-medium text-[#f5f1e8]"><Check className="h-4 w-4 text-[#d8bd90]" /> Escolha de atendente pelo cliente</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Relatórios de comissão por atendente</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Suporte prioritário via WhatsApp</li>
                 </ul>
-                <Button className="w-full mt-6 shadow-md shadow-primary/25 font-bold" asChild>
+                <Button className="mt-6 w-full bg-[#c5a572] font-bold text-[#211e1b] shadow-md shadow-black/20 hover:bg-[#d4b989]" asChild>
                   <Link to="/onboarding">Criar Conta Grátis (5 dias)</Link>
                 </Button>
               </CardContent>
             </Card>
 
             {/* Gym / Enterprise Plan */}
-            <Card className="flex flex-col justify-between border-border/80 hover:shadow-md transition-shadow">
+            <Card className="flex flex-col justify-between border-[#454036] bg-[#26231e] text-[#f5f1e8] transition-shadow hover:shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">Academia & Turmas</CardTitle>
-                <p className="text-xs text-muted-foreground">Para academias, box de cross e estúdios coletivos.</p>
+                <CardTitle className="text-xl text-[#f5f1e8]">Academia & Turmas</CardTitle>
+                <p className="text-xs text-white/55">Para academias, box de cross e estúdios coletivos.</p>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-foreground">
+                  <span className="text-3xl font-extrabold text-[#f5f1e8]">
                     R$ {billingCycle === 'monthly' ? '149' : '119'}
                   </span>
-                  <span className="text-xs text-muted-foreground">/mês</span>
+                  <span className="text-xs text-white/50">/mês</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="space-y-2.5 text-xs text-muted-foreground">
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Tudo do plano Profissional</li>
-                  <li className="flex items-center gap-2 font-medium text-foreground"><Check className="h-4 w-4 text-emerald-500" /> Aulas coletivas com limite de vagas</li>
-                  <li className="flex items-center gap-2 font-medium text-foreground"><Check className="h-4 w-4 text-emerald-500" /> Profissionais e instrutores ilimitados</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Controle de lista de presença</li>
-                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-emerald-500" /> Gerente de conta exclusivo</li>
+                <ul className="space-y-2.5 text-xs text-white/65">
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Tudo do plano Profissional</li>
+                  <li className="flex items-center gap-2 font-medium text-[#f5f1e8]"><Check className="h-4 w-4 text-[#d8bd90]" /> Aulas coletivas com limite de vagas</li>
+                  <li className="flex items-center gap-2 font-medium text-[#f5f1e8]"><Check className="h-4 w-4 text-[#d8bd90]" /> Profissionais e instrutores ilimitados</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Controle de lista de presença</li>
+                  <li className="flex items-center gap-2"><Check className="h-4 w-4 text-[#d8bd90]" /> Gerente de conta exclusivo</li>
                 </ul>
-                <Button className="w-full mt-6" variant="outline" asChild>
+                <Button className="mt-6 w-full border-white/20 bg-transparent text-white/80 hover:bg-white/10 hover:text-white" variant="outline" asChild>
                   <Link to="/onboarding">Criar Conta Grátis (5 dias)</Link>
                 </Button>
               </CardContent>
@@ -578,11 +580,11 @@ export const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 border-t border-border/40 text-center text-xs text-muted-foreground">
+      <footer className="mt-auto border-t border-[#3b352b] bg-[#171613] py-8 text-center text-xs text-white/50">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-foreground">Agendou.SaaS</span> - Plataforma Multitenant de Agendamentos
+            <Calendar className="h-4 w-4 text-[#d8bd90]" />
+            <span className="font-semibold text-[#f5f1e8]">Agendou.SaaS</span> - Plataforma de agendamentos
           </div>
           <p>© 2026 Todos os direitos reservados. Feito para alta conversão.</p>
         </div>
