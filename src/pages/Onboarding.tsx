@@ -757,14 +757,19 @@ export const Onboarding = () => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
-                  <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(3)}>
+                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
+                  <Button type="button" variant="outline" className="w-full min-w-0 sm:flex-1" onClick={() => setStep(3)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Voltar
                   </Button>
-                  <Button type="submit" className="flex-1 h-11 font-bold shadow-lg shadow-primary/20" disabled={isCreating}>
+                  <Button type="submit" className="h-11 w-full min-w-0 font-bold shadow-lg shadow-primary/20 sm:flex-1" disabled={isCreating}>
                     <CheckCircle className="mr-2 h-4 w-4" />
-                    {isCreating ? 'Criando sua agenda...' : isAuthenticated ? 'Concluir e Abrir Painel' : 'Continuar e Criar Conta'}
+                    <span className="sm:hidden">
+                      {isCreating ? 'Criando...' : isAuthenticated ? 'Criar agenda' : 'Continuar'}
+                    </span>
+                    <span className="hidden sm:inline">
+                      {isCreating ? 'Criando sua agenda...' : isAuthenticated ? 'Concluir e Abrir Painel' : 'Continuar e Criar Conta'}
+                    </span>
                   </Button>
                 </div>
               </form>
