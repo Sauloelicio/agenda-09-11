@@ -98,6 +98,11 @@ const SITE_STYLES: { id: SiteStyle; title: string; description: string; radius: 
   { id: 'bold', title: 'Marcante', description: 'Mais contraste para destacar sua marca.', radius: '0.75rem' },
 ];
 
+const formatPrice = (price: number) => new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+}).format(price);
+
 export const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -584,7 +589,7 @@ export const Onboarding = () => {
                             </span>
                           </span>
                           <span className="shrink-0 text-xs font-bold" style={{ color: primaryColor }}>
-                            R$ {Number(servicePrice || 0).toFixed(2)}
+                            {formatPrice(Number(servicePrice) || 0)}
                           </span>
                         </div>
 
@@ -639,9 +644,9 @@ export const Onboarding = () => {
 
             {/* STEP 4: Hours & First Service */}
             {step === 4 && (
-              <form onSubmit={handleComplete} className="space-y-4">
+              <form onSubmit={handleComplete} className="flex flex-col gap-4">
                 {/* Working hours */}
-                <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-3">
+                <div className="order-2 space-y-3 rounded-xl border border-border bg-muted/20 p-3.5 sm:order-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5" />
                     Expediente Básico
@@ -693,7 +698,7 @@ export const Onboarding = () => {
                 </div>
 
                 {/* First Service configuration */}
-                <div className="p-3.5 rounded-xl border border-border bg-muted/20 space-y-3">
+                <div className="order-3 space-y-3 rounded-xl border border-border bg-muted/20 p-3.5 sm:order-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5" />
                     Primeiro Serviço Cadastrado
@@ -757,7 +762,98 @@ export const Onboarding = () => {
                   )}
                 </div>
 
-                <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
+                <section className="order-1 overflow-hidden rounded-2xl border border-border sm:order-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
+                    <span className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                      <Eye className="h-3.5 w-3.5" />
+                      Prévia da página do cliente
+                    </span>
+                    <Badge variant="secondary" className="text-[9px] font-semibold">
+                      DEMONSTRAÇÃO
+                    </Badge>
+                  </div>
+                  <div className="p-3 sm:p-4" style={{ backgroundColor: selectedPalette.soft }}>
+                    <div
+                      className="mx-auto max-w-sm overflow-hidden border border-black/10 bg-background shadow-sm"
+                      style={{ borderRadius: selectedSiteStyle.radius }}
+                    >
+                      <div className="flex items-center gap-3 border-b border-border/70 px-3 py-3">
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center text-sm font-bold"
+                          style={{
+                            backgroundColor: `${primaryColor}18`,
+                            color: primaryColor,
+                            borderRadius: selectedSiteStyle.radius,
+                          }}
+                        >
+                          {(name.trim()[0] || 'N').toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-bold">{name.trim() || 'Nome do seu negócio'}</span>
+                          <span className="block text-[10px] text-muted-foreground">Agendamento online</span>
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 border-current px-2 py-0.5 text-[9px] font-semibold"
+                          style={{ color: primaryColor, borderColor: `${primaryColor}55` }}
+                        >
+                          {segment === 'barbershop' ? 'BARBEARIA' : segment === 'gym' ? 'AULAS' : segment === 'clinic' ? 'SAÚDE' : segment === 'services' ? 'SERVIÇOS' : 'BELEZA'}
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-3 p-3">
+                        <div>
+                          <p className="text-xs font-bold">Seu primeiro serviço</p>
+                          <p className="mt-0.5 text-[10px] text-muted-foreground">Uma prévia do que seu cliente verá</p>
+                        </div>
+                        <div
+                          className="flex items-center justify-between gap-3 border p-2.5"
+                          style={{ borderColor: `${primaryColor}66`, borderRadius: selectedSiteStyle.radius }}
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Sparkles className="h-4 w-4 shrink-0" style={{ color: primaryColor }} />
+                            <span className="min-w-0">
+                              <span className="block truncate text-xs font-semibold">{serviceName.trim() || 'Seu primeiro serviço'}</span>
+                              <span className="mt-0.5 block text-[10px] text-muted-foreground">{serviceDuration || 60} min · {serviceCapacity || 1} {segment === 'gym' ? 'vagas' : 'vaga'}</span>
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-xs font-bold" style={{ color: primaryColor }}>
+                            {formatPrice(Number(servicePrice) || 0)}
+                          </span>
+                        </div>
+
+                        <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-2.5">
+                          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: primaryColor }} />
+                          <div className="min-w-0">
+                            <p className="text-[10px] font-semibold">Horário de atendimento</p>
+                            <p className="mt-0.5 text-[10px] text-muted-foreground">
+                              {openTime} às {closeTime}
+                              {' · '}
+                              {WEEKDAYS.filter((day) => openWeekdays.includes(day.id)).map((day) => day.label).join(', ') || 'selecione os dias'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span
+                          className="block w-full px-3 py-2.5 text-center text-xs font-semibold"
+                          style={{
+                            backgroundColor: primaryColor,
+                            color: getColorForeground(primaryColor),
+                            borderRadius: selectedSiteStyle.radius,
+                          }}
+                        >
+                          Ver horários disponíveis
+                          <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
+                        </span>
+                      </div>
+                    </div>
+                    <p className="mt-2 text-center text-[10px] text-muted-foreground">
+                      Prévia ilustrativa. Nenhum dado será salvo nesta demonstração.
+                    </p>
+                  </div>
+                </section>
+
+                <div className="order-4 flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
                   <Button type="button" variant="outline" className="w-full min-w-0 sm:flex-1" onClick={() => setStep(3)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Voltar
