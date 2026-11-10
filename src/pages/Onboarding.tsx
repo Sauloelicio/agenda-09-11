@@ -84,12 +84,12 @@ const WEEKDAYS = [
 ];
 
 const COLOR_PALETTES = [
-  { name: 'Rosa', color: '#e54878', mood: 'Delicado e elegante' },
-  { name: 'Verde', color: '#0f9f83', mood: 'Natural e tranquilo' },
-  { name: 'Azul', color: '#2563eb', mood: 'Moderno e confiável' },
-  { name: 'Violeta', color: '#8b5cf6', mood: 'Criativo e sofisticado' },
-  { name: 'Âmbar', color: '#d97706', mood: 'Acolhedor e marcante' },
-  { name: 'Grafite', color: '#334155', mood: 'Clássico e minimalista' },
+  { name: 'Grafite', color: '#292723', mood: 'Sofisticado e atemporal', soft: '#f1efeb' },
+  { name: 'Champanhe', color: '#a77b3f', mood: 'Elegante e acolhedor', soft: '#f7f1e7' },
+  { name: 'Terracota', color: '#b85c45', mood: 'Autoral e caloroso', soft: '#f8eeeb' },
+  { name: 'Oliva', color: '#62734d', mood: 'Natural e equilibrado', soft: '#f0f2ec' },
+  { name: 'Azul petróleo', color: '#286675', mood: 'Seguro e contemporâneo', soft: '#edf3f4' },
+  { name: 'Vinho', color: '#773f56', mood: 'Marcante e elegante', soft: '#f5eef1' },
 ];
 
 const SITE_STYLES: { id: SiteStyle; title: string; description: string; radius: string }[] = [
@@ -111,8 +111,21 @@ export const Onboarding = () => {
   const [phone, setPhone] = useState('');
   const [slug, setSlug] = useState('');
   const [segment, setSegment] = useState<SegmentType>('salon');
-  const [primaryColor, setPrimaryColor] = useState(COLOR_PALETTES[0].color);
+  const [primaryColor, setPrimaryColor] = useState(COLOR_PALETTES[2].color);
   const [siteStyle, setSiteStyle] = useState<SiteStyle>('warm');
+  const selectedPalette = COLOR_PALETTES.find((palette) => palette.color === primaryColor) ?? COLOR_PALETTES[0];
+  const selectedSiteStyle = SITE_STYLES.find((style) => style.id === siteStyle) ?? SITE_STYLES[1];
+  const progressPercent = Math.round((step / 4) * 100);
+
+  const getColorForeground = (color: string) => {
+    const channels = color.match(/[\da-f]{2}/gi)?.map((channel) => parseInt(channel, 16) / 255) ?? [];
+    if (channels.length !== 3) return '#ffffff';
+    const luminance = channels.reduce((sum, channel, index) => {
+      const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      return sum + linear * [0.2126, 0.7152, 0.0722][index];
+    }, 0);
+    return luminance > 0.4 ? '#211e1b' : '#ffffff';
+  };
 
   // Business Hours
   const [openTime, setOpenTime] = useState('09:00');
@@ -142,13 +155,13 @@ export const Onboarding = () => {
 
   const handleSelectSegment = (selected: SegmentType) => {
     setSegment(selected);
-    const suggestedColor = selected === 'barbershop'
-      ? COLOR_PALETTES[4].color
-      : selected === 'gym'
-        ? COLOR_PALETTES[2].color
-        : selected === 'salon'
-          ? COLOR_PALETTES[0].color
-          : COLOR_PALETTES[3].color;
+    const suggestedColor = ({
+      salon: '#b85c45',
+      barbershop: '#292723',
+      gym: '#286675',
+      clinic: '#62734d',
+      services: '#773f56',
+    } satisfies Record<SegmentType, string>)[selected];
     setPrimaryColor(suggestedColor);
     const template = SEGMENTS.find((s) => s.id === selected);
     if (template) {
@@ -287,40 +300,47 @@ export const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex flex-col justify-center py-10 px-4">
+    <div className="flex min-h-screen flex-col justify-center bg-gradient-to-br from-background via-muted/20 to-background px-3 py-6 sm:px-4 sm:py-10">
       <div className="max-w-xl w-full mx-auto">
         {/* Back to Home & Step indicator */}
-        <div className="flex items-center justify-between mb-6">
-          <Button variant="ghost" size="sm" asChild className="text-muted-foreground hover:text-foreground">
+        <div className="mb-4 flex items-center justify-between sm:mb-6">
+          <Button variant="ghost" size="sm" asChild className="-ml-2 min-h-10 text-muted-foreground hover:text-foreground">
             <Link to="/">
               <ArrowLeft className="h-4 w-4 mr-1.5" />
               Página Inicial
             </Link>
           </Button>
 
-          <Badge variant="outline" className="px-3 py-1 font-semibold text-xs border-primary/30 text-primary">
-            Passo {step} de 4
+          <Badge variant="outline" className="border-primary/30 px-3 py-1 font-semibold text-xs text-primary">
+            Passo {step} de 4 <span className="ml-1 text-muted-foreground">· {progressPercent}%</span>
           </Badge>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full bg-muted h-2 rounded-full mb-8 overflow-hidden">
+        <div
+          className="mb-5 h-2 w-full overflow-hidden rounded-full bg-muted sm:mb-8"
+          role="progressbar"
+          aria-label="Progresso da configuração"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progressPercent}
+        >
           <div 
             className="bg-primary h-full transition-all duration-300 ease-out"
-            style={{ width: `${(step / 4) * 100}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
 
-        <Card className="shadow-2xl border-border/80">
-          <CardHeader className="text-center pb-4">
-            <div className="mx-auto h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-2 shadow-inner">
+        <Card className="border-border/80 shadow-2xl">
+          <CardHeader className="pb-3 text-center sm:pb-4">
+            <div className="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary shadow-inner sm:h-12 sm:w-12">
               {step === 1 && <Building2 className="h-6 w-6" />}
               {step === 2 && <Scissors className="h-6 w-6" />}
               {step === 3 && <Paintbrush className="h-6 w-6" />}
               {step === 4 && <Clock className="h-6 w-6" />}
             </div>
 
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-xl font-bold sm:text-2xl">
               {step === 1 && 'Dados do seu Negócio'}
               {step === 2 && 'Qual é o seu Segmento?'}
               {step === 3 && 'A cara do seu site'}
@@ -329,12 +349,12 @@ export const Onboarding = () => {
             <CardDescription className="text-sm">
               {step === 1 && 'Identifique sua empresa e escolha seu link exclusivo de agendamento.'}
               {step === 2 && 'Personalizamos as regras (individual ou turma) de acordo com seu ramo.'}
-              {step === 3 && 'Escolha as cores e o estilo visual. Você já pode ver uma prévia da página.'}
+              {step === 3 && 'Escolha a identidade visual e veja como sua página de agendamento vai ficar.'}
               {step === 4 && 'Defina seu expediente básico e o primeiro serviço que seus clientes poderão agendar.'}
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="pt-2">
+          <CardContent className="px-4 pt-2 sm:px-6">
             {/* STEP 1: Name, Phone, Slug */}
             {step === 1 && (
               <div className="space-y-4">
@@ -444,13 +464,13 @@ export const Onboarding = () => {
 
             {/* STEP 3: Website appearance */}
             {step === 3 && (
-              <div className="space-y-5">
-                <section className="space-y-3">
+              <div className="flex flex-col gap-4 sm:gap-5">
+                <section className="order-1 space-y-3">
                   <div>
-                    <Label className="text-sm font-semibold">Escolha a cor da sua marca</Label>
-                    <p className="text-xs text-muted-foreground mt-1">Ela será usada nos botões e nos destaques do seu site.</p>
+                    <Label className="text-sm font-semibold">Escolha a identidade do seu negócio</Label>
+                    <p className="mt-1 text-xs text-muted-foreground">A cor escolhida destaca botões e detalhes da sua página.</p>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-3 sm:gap-2" role="group" aria-label="Paletas de cores">
                     {COLOR_PALETTES.map((palette) => {
                       const selected = primaryColor === palette.color;
                       return (
@@ -459,14 +479,20 @@ export const Onboarding = () => {
                           type="button"
                           onClick={() => setPrimaryColor(palette.color)}
                           aria-pressed={selected}
-                          className={`flex items-center gap-2 rounded-xl border p-2.5 text-left transition-colors ${
+                          className={`flex min-h-[66px] flex-col items-center justify-center gap-1 rounded-xl border p-1.5 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[58px] sm:flex-row sm:gap-2 sm:p-2.5 sm:text-left ${
                             selected ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border hover:bg-muted/50'
                           }`}
                         >
-                          <span className="h-8 w-8 shrink-0 rounded-full shadow-sm" style={{ backgroundColor: palette.color }} />
+                          <span
+                            className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full border border-black/10 shadow-sm sm:h-9 sm:w-9"
+                            style={{ backgroundColor: palette.color }}
+                            aria-hidden="true"
+                          >
+                            <span className="absolute inset-x-0 bottom-0 h-2/5 border-t border-white/30" style={{ backgroundColor: palette.soft }} />
+                          </span>
                           <span className="min-w-0">
-                            <span className="block text-xs font-semibold">{palette.name}</span>
-                            <span className="block truncate text-[10px] text-muted-foreground">{palette.mood}</span>
+                            <span className="block truncate text-[10px] font-semibold sm:text-xs">{palette.name}</span>
+                            <span className="hidden truncate text-[10px] text-muted-foreground sm:block">{palette.mood}</span>
                           </span>
                           {selected && <Check className="ml-auto h-4 w-4 shrink-0 text-primary" />}
                         </button>
@@ -475,12 +501,12 @@ export const Onboarding = () => {
                   </div>
                 </section>
 
-                <section className="space-y-3">
+                <section className="order-3 space-y-3 sm:order-2">
                   <div>
                     <Label className="text-sm font-semibold">Qual estilo combina com você?</Label>
                     <p className="text-xs text-muted-foreground mt-1">Isso define o formato dos elementos e o clima da página.</p>
                   </div>
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                     {SITE_STYLES.map((style) => {
                       const selected = siteStyle === style.id;
                       return (
@@ -489,46 +515,116 @@ export const Onboarding = () => {
                           type="button"
                           onClick={() => setSiteStyle(style.id)}
                           aria-pressed={selected}
-                          className={`rounded-xl border p-3 text-left transition-colors ${
+                          className={`min-h-[66px] rounded-xl border p-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary sm:min-h-[82px] sm:p-3 ${
                             selected ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border hover:bg-muted/50'
                           }`}
                         >
-                          <span className="mb-2 flex h-9 items-center gap-1.5">
-                            <span className="h-7 w-7 border-2" style={{ backgroundColor: primaryColor, borderColor: primaryColor, borderRadius: style.radius }} />
-                            <span className="h-5 flex-1 border" style={{ borderColor: primaryColor, borderRadius: style.radius }} />
+                          <span className="mb-1.5 flex h-6 items-center gap-1 sm:mb-2 sm:h-9 sm:gap-1.5">
+                            <span className="h-5 w-5 shrink-0 border-2 sm:h-7 sm:w-7" style={{ backgroundColor: primaryColor, borderColor: primaryColor, borderRadius: style.radius }} />
+                            <span className="h-4 flex-1 border sm:h-5" style={{ borderColor: primaryColor, borderRadius: style.radius }} />
                           </span>
-                          <span className="block text-xs font-semibold">{style.title}</span>
-                          <span className="mt-1 block text-[10px] leading-snug text-muted-foreground">{style.description}</span>
+                          <span className="block truncate text-[10px] font-semibold sm:text-xs">{style.title}</span>
+                          <span className="mt-1 hidden text-[10px] leading-snug text-muted-foreground sm:block">{style.description}</span>
                         </button>
                       );
                     })}
                   </div>
                 </section>
 
-                <section className="overflow-hidden rounded-xl border border-border bg-muted/20">
-                  <div className="flex items-center gap-2 border-b border-border px-3 py-2 text-xs font-semibold text-muted-foreground">
+                <section className="order-2 overflow-hidden rounded-2xl border border-border bg-muted/20 sm:order-3">
+                  <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5 text-xs font-semibold text-muted-foreground">
+                    <span className="flex items-center gap-2">
                     <Eye className="h-3.5 w-3.5" />
-                    Prévia do seu site
+                      Prévia da agenda do cliente
+                    </span>
+                    <span className="rounded-full bg-background px-2 py-1 text-[10px] font-medium">
+                      Ao vivo
+                    </span>
                   </div>
-                  <div className="bg-background p-4 text-center">
-                    <span
-                      className="mx-auto mb-2 flex h-9 w-9 items-center justify-center text-sm font-bold text-white"
-                      style={{ backgroundColor: primaryColor, borderRadius: SITE_STYLES.find((style) => style.id === siteStyle)?.radius }}
-                    >
-                      {(name.trim()[0] || 'N').toUpperCase()}
-                    </span>
-                    <p className="font-bold">{name.trim() || 'Nome do seu negócio'}</p>
-                    <p className="mb-3 text-[11px] text-muted-foreground">Agende seu horário online</p>
-                    <span
-                      className="inline-flex items-center rounded-md px-4 py-2 text-xs font-semibold text-white"
-                      style={{ backgroundColor: primaryColor, borderRadius: SITE_STYLES.find((style) => style.id === siteStyle)?.radius }}
-                    >
-                      Escolher serviço
-                    </span>
+                  <div className="p-3 sm:p-4" style={{ backgroundColor: selectedPalette.soft }}>
+                    <div className="mx-auto max-w-sm overflow-hidden border border-black/10 bg-background shadow-sm" style={{ borderRadius: selectedSiteStyle.radius }}>
+                      <div className="flex items-center gap-3 border-b border-border/70 px-3 py-3">
+                        <span
+                          className="flex h-9 w-9 shrink-0 items-center justify-center text-sm font-bold"
+                          style={{
+                            backgroundColor: `${primaryColor}18`,
+                            color: primaryColor,
+                            borderRadius: selectedSiteStyle.radius,
+                          }}
+                        >
+                          {(name.trim()[0] || 'N').toUpperCase()}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-bold">{name.trim() || 'Nome do seu negócio'}</span>
+                          <span className="block text-[10px] text-muted-foreground">Agendamento online</span>
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className="shrink-0 border-current px-2 py-0.5 text-[9px] font-semibold"
+                          style={{ color: primaryColor, borderColor: `${primaryColor}55` }}
+                        >
+                          {segment === 'barbershop' ? 'BARBEARIA' : segment === 'gym' ? 'AULAS' : segment === 'clinic' ? 'SAÚDE' : segment === 'services' ? 'SERVIÇOS' : 'BELEZA'}
+                        </Badge>
+                      </div>
+
+                      <div className="space-y-3 p-3">
+                        <div>
+                          <p className="text-xs font-bold">Escolha seu serviço</p>
+                          <p className="mt-0.5 text-[10px] text-muted-foreground">Selecione uma opção para continuar</p>
+                        </div>
+                        <div
+                          className="flex items-center justify-between gap-3 border p-2.5"
+                          style={{ borderColor: `${primaryColor}66`, borderRadius: selectedSiteStyle.radius }}
+                        >
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Sparkles className="h-4 w-4 shrink-0" style={{ color: primaryColor }} />
+                            <span className="min-w-0">
+                              <span className="block truncate text-xs font-semibold">{serviceName.trim() || 'Seu primeiro serviço'}</span>
+                              <span className="mt-0.5 block text-[10px] text-muted-foreground">{serviceDuration || 60} min · atendimento online</span>
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-xs font-bold" style={{ color: primaryColor }}>
+                            R$ {Number(servicePrice || 0).toFixed(2)}
+                          </span>
+                        </div>
+
+                        <div>
+                          <p className="mb-2 flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5" style={{ color: primaryColor }} />
+                            Próximos horários
+                          </p>
+                          <div className="grid grid-cols-3 gap-1.5">
+                            {['09:00', '10:30', '14:00'].map((time, index) => (
+                              <span
+                                key={time}
+                                className="rounded-md border px-2 py-1.5 text-center text-[10px] font-medium"
+                                style={index === 1
+                                  ? { backgroundColor: primaryColor, borderColor: primaryColor, color: getColorForeground(primaryColor) }
+                                  : { borderColor: `${primaryColor}40`, color: primaryColor }}
+                              >
+                                {time}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        <span
+                          className="block w-full px-3 py-2.5 text-center text-xs font-semibold"
+                          style={{
+                            backgroundColor: primaryColor,
+                            color: getColorForeground(primaryColor),
+                            borderRadius: selectedSiteStyle.radius,
+                          }}
+                        >
+                          Continuar agendamento
+                          <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </section>
 
-                <div className="flex items-center gap-3 pt-1">
+                <div className="order-4 flex items-center gap-3 pt-1">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Voltar
