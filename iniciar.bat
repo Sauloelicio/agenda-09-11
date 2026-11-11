@@ -3,21 +3,10 @@ title Iniciando Agendou SaaS
 echo ========================================================
 echo   Iniciando o Servidor de Desenvolvimento do SaaS...
 echo ========================================================
+echo [INFO] O Vite roda dentro do WSL (filesystem nativo).
+echo [INFO] Abra http://localhost:5173 no navegador.
+echo.
 
-:: Se estiver em caminho de rede UNC, mapeia unidade Z:
-if "%~d0"=="\\" (
-  echo [INFO] Mapeando caminho de rede para unidade Z:...
-  pushd "%~dp0"
-) else (
-  cd /d "%~dp0"
-)
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0iniciar.ps1"
 
-echo [INFO] Pasta atual: %CD%
-echo [INFO] Iniciando Vite na porta 5173...
-call npm run dev
-
-if "%~d0"=="\\" (
-  popd
-)
 pause
-

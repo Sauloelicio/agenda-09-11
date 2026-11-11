@@ -616,7 +616,7 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.find_tenant_appointments(_tenant_id uuid, _phone text)
-RETURNS TABLE(id uuid, client_name text, service_name text, date date, time text)
+RETURNS TABLE(id uuid, client_name text, service_name text, date date, "time" text)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
