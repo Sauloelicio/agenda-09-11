@@ -24,7 +24,6 @@ interface LoginParams {
 interface AuthResult {
   success: boolean;
   error?: string;
-  requiresEmailConfirmation?: boolean;
 }
 
 /** Traduz os erros mais comuns do Supabase Auth para mensagens acionáveis. */
@@ -167,17 +166,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'A senha precisa ter pelo menos 8 caracteres.' };
     }
 
+    // Cadastro sem confirmação de e-mail: não enviamos redirect de
+    // confirmação e esperamos receber a sessão já na resposta.
+    const normalizedEmail = email.trim().toLowerCase();
     const { data, error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
+      email: normalizedEmail,
       password,
       options: {
         data: { full_name: name.trim() },
-        emailRedirectTo: `${window.location.origin}/login`,
       },
     });
 
     if (error) return { success: false, error: friendlyAuthError(error.message) };
-    return { success: true, requiresEmailConfirmation: !data.session };
+
+    if (data.session) return { success: true };
+
+    // Garantia extra para projetos que ainda estejam com a confirmação
+    // ligada no GoTrue: se a conta já foi ativada no banco, o login direto
+    // funciona e o usuário entra sem passar por e-mail.
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
+
+    if (!signInError) return { success: true };
+
+    return {
+      success: false,
+      error: 'Conta criada, mas não foi possível ativá-la automaticamente. Tente entrar com o mesmo e-mail e senha.',
+    };
   }, []);
 
   const login = useCallback(async ({ email, password }: LoginParams): Promise<AuthResult> => {

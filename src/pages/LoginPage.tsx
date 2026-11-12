@@ -116,12 +116,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ redirectTo }) => {
           return;
         }
 
-        if (result.requiresEmailConfirmation) {
-          toast.success('Conta criada. Confirme seu e-mail para entrar e concluir a configuração da agenda.');
-          navigate('/login', { replace: true });
-          return;
-        }
-
+        // Cadastro sem confirmação: a conta já nasce ativa, então seguimos
+        // direto para o sistema.
         toast.success('Conta criada! Bem-vindo(a).');
         navigate(destination, { replace: true });
       } else {

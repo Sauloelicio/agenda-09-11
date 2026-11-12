@@ -184,8 +184,13 @@ Depois, no Dashboard:
 
 - **Authentication → URL Configuration:** Site URL e Redirect URLs do domínio
   onde o app está publicado (veja a seção de deploy abaixo)
-- **Authentication → Providers → Email:** "Confirm email" pode ficar ligado; o
-  app trata o caso (`requiresEmailConfirmation`) e mostra "confirme seu e-mail"
+- **Authentication → Sign In / Providers → Email:** desligue **"Confirm email"**.
+  O cadastro não exige confirmação: a conta nasce ativa e o usuário entra
+  direto no sistema (`requiresEmailConfirmation` foi removido do app).
+- Alternativa sem painel: a migration
+  `20261112120000_auto_confirm_users.sql` cria um trigger em `auth.users`
+  que marca `email_confirmed_at` no INSERT, produzindo o mesmo efeito
+  (validado com GoTrue `mailer_autoconfirm=false`).
 
 ### 6. Deploy na Vercel
 
