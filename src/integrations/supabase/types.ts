@@ -79,6 +79,11 @@ export type Database = {
         { id?: string; tenant_id: string; user_id: string; role?: string; created_at?: string },
         { role?: string }
       >
+      master_admins: TableShape<
+        { user_id: string; note: string | null; created_at: string },
+        { user_id: string; note?: string | null; created_at?: string },
+        { note?: string | null }
+      >
       tenant_settings: TableShape<
         {
           tenant_id: string
@@ -399,6 +404,49 @@ export type Database = {
         }[]
       }
       get_public_tenant_page: { Args: { _slug: string }; Returns: Json }
+      is_master: { Args: never; Returns: boolean }
+      master_list_accounts: {
+        Args: never
+        Returns: {
+          tenant_id: string
+          name: string
+          slug: string
+          segment: string
+          plan: string
+          subscription_status: string
+          trial_ends_at: string
+          created_at: string
+          owner_email: string | null
+          owner_name: string | null
+          services_count: number
+          professionals_count: number
+          appointments_count: number
+          clients_count: number
+          revenue_total: number
+        }[]
+      }
+      master_list_users: {
+        Args: never
+        Returns: {
+          user_id: string
+          email: string
+          full_name: string
+          created_at: string
+          last_sign_in_at: string | null
+          is_master: boolean
+          tenant_count: number
+        }[]
+      }
+      master_set_subscription: {
+        Args: { _tenant_id: string; _plan: string; _status: string; _trial_ends_at?: string | null }
+        Returns: undefined
+      }
+      master_set_tenant_owner: {
+        Args: { _tenant_id: string; _email: string }
+        Returns: undefined
+      }
+      master_delete_tenant: { Args: { _tenant_id: string }; Returns: undefined }
+      master_set_master: { Args: { _user_id: string; _enabled: boolean }; Returns: undefined }
       get_tenant_occupied_slots: {
         Args: { _date: string; _professional_id?: string | null; _service_id: string; _tenant_id: string }
         Returns: string[]

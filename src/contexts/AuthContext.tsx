@@ -8,6 +8,8 @@ export interface AuthUser {
   name: string;
   createdAt: string;
   ownedTenantIds: string[];
+  /** Super admin da plataforma: acessa e gerencia todos os tenants. */
+  isMaster: boolean;
 }
 
 interface RegisterParams {
@@ -64,16 +66,23 @@ interface AuthContextType {
   updatePassword: (password: string) => Promise<AuthResult>;
   reloadOwnedTenants: () => Promise<void>;
   isOwnerOf: (tenantId: string) => boolean;
+  /** Verdadeiro para o super admin da plataforma. */
+  isMaster: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const toAuthUser = (user: SupabaseUser, ownedTenantIds: string[] = []): AuthUser => ({
+const toAuthUser = (
+  user: SupabaseUser,
+  ownedTenantIds: string[] = [],
+  isMaster = false,
+): AuthUser => ({
   id: user.id,
   email: user.email ?? '',
   name: String(user.user_metadata.full_name ?? user.user_metadata.name ?? user.email ?? 'Cliente'),
   createdAt: user.created_at,
   ownedTenantIds,
+  isMaster,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -86,21 +95,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loadOwnedTenants = useCallback(async (supabaseUser: SupabaseUser) => {
     setMembershipsLoading(true);
-    const { data, error } = await supabase
-      .from('tenant_members')
-      .select('tenant_id')
-      .eq('user_id', supabaseUser.id)
-      .eq('role', 'owner');
+    const [membershipResult, masterResult] = await Promise.all([
+      supabase
+        .from('tenant_members')
+        .select('tenant_id')
+        .eq('user_id', supabaseUser.id)
+        .eq('role', 'owner'),
+      // A tabela master_admins pode não existir em um projeto que ainda não
+      // recebeu a migration do super admin; nesse caso seguimos como usuário
+      // normal em vez de derrubar o login.
+      supabase
+        .from('master_admins')
+        .select('user_id')
+        .eq('user_id', supabaseUser.id)
+        .maybeSingle(),
+    ]);
 
-    if (error) {
-      console.error('Unable to load account workspaces:', error.message);
+    if (membershipResult.error) {
+      console.error('Unable to load account workspaces:', membershipResult.error.message);
       setAuthError('Não foi possível carregar suas agendas. Atualize a página para tentar novamente.');
       setMembershipsLoading(false);
       return;
     }
 
+    const isMaster = !masterResult.error && !!masterResult.data;
+    let tenantIds = (membershipResult.data ?? []).map((membership) => membership.tenant_id);
+
+    // Master enxerga todas as contas: carregamos todos os tenants para que o
+    // dashboard, o seletor de agendas e as métricas funcionem sem restrição.
+    if (isMaster) {
+      const { data: allTenants, error: tenantsError } = await supabase.from('tenants').select('id');
+      if (tenantsError) {
+        console.error('Unable to load all tenants for master:', tenantsError.message);
+      } else {
+        tenantIds = (allTenants ?? []).map((tenant) => tenant.id);
+      }
+    }
+
     setUser((current) => current?.id === supabaseUser.id
-      ? toAuthUser(supabaseUser, data.map((membership) => membership.tenant_id))
+      ? toAuthUser(supabaseUser, tenantIds, isMaster)
       : current);
     setAuthError(null);
     setMembershipsLoading(false);
@@ -119,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (activeSessionUserId.current === session.user.id) {
       setUser((current) => current?.id === session.user.id
-        ? toAuthUser(session.user, current.ownedTenantIds)
+        ? toAuthUser(session.user, current.ownedTenantIds, current.isMaster)
         : current);
       setIsLoading(false);
       return;
@@ -244,7 +277,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadOwnedTenants]);
 
   const isOwnerOf = useCallback(
-    (tenantId: string) => user?.ownedTenantIds.includes(tenantId) ?? false,
+    (tenantId: string) => user?.isMaster || (user?.ownedTenantIds.includes(tenantId) ?? false),
     [user]
   );
 
@@ -262,6 +295,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updatePassword,
     reloadOwnedTenants,
     isOwnerOf,
+    isMaster: user?.isMaster ?? false,
   }), [
     user, isLoading, membershipsLoading, isPasswordRecovery, authError, register, login, logout,
     requestPasswordReset, updatePassword, reloadOwnedTenants, isOwnerOf,

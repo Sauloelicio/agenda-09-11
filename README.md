@@ -192,6 +192,28 @@ Depois, no Dashboard:
   que marca `email_confirmed_at` no INSERT, produzindo o mesmo efeito
   (validado com GoTrue `mailer_autoconfirm=false`).
 
+#### Super admin (master)
+
+A migration `20261112130000_master_admin.sql` cria `public.master_admins` e a
+camada de super admin da plataforma.
+
+- Conta master: **`sauloelicio554@gmail.com`** (a senha é definida no Auth).
+- Ao entrar, o master vê todas as contas e acessa o **Painel Master** em
+  `/master` (link "Painel Master" também aparece no cabeçalho de `/admin`).
+- No painel é possível: ver métricas de todas as contas, alterar plano/status/
+  validade do teste, abrir o painel de qualquer conta, transferir a
+  propriedade, excluir a conta com todos os dados e conceder/remover master.
+- O master não depende de `tenant_members`: `is_tenant_member()`,
+  `tenant_has_access()` e `has_role()` passam a liberar acesso total para ele.
+  Usuários comuns continuam isolados pelo RLS.
+- Escritas sensíveis passam por RPCs `SECURITY DEFINER` que exigem
+  `is_master()`: `master_list_accounts`, `master_list_users`,
+  `master_set_subscription`, `master_set_tenant_owner`,
+  `master_delete_tenant` e `master_set_master`.
+- A conta master entra automaticamente em `master_admins` quando é criada
+  (trigger em `auth.users`); a migration também vincula a conta se ela já
+  existir.
+
 ### 6. Deploy na Vercel
 
 O `vercel.json` já define framework, pasta de saída e o rewrite de SPA

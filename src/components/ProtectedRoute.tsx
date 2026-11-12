@@ -76,7 +76,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
  * verifica autenticação E se o usuário é dono do currentTenant.
  */
 export const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, isLoading, membershipsLoading, authError, reloadOwnedTenants, user } = useAuth();
+  const { isAuthenticated, isLoading, membershipsLoading, authError, reloadOwnedTenants, user, isMaster } = useAuth();
   const { currentTenant, tenants, workspaceLoading, workspaceError } = useSaas();
   const location = useLocation();
 
@@ -134,31 +134,74 @@ export const AdminProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ c
     );
   }
 
-  const ownedTenant = tenants.find((tenant) => user?.ownedTenantIds.includes(tenant.id));
+  const ownedTenant = isMaster
+    ? (tenants.find((tenant) => tenant.id === currentTenant?.id) ?? tenants[0])
+    : tenants.find((tenant) => user?.ownedTenantIds.includes(tenant.id));
   if (!ownedTenant) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full text-center p-6">
-          <CardTitle className="mb-2">Sua conta ainda não tem uma agenda</CardTitle>
-          <p className="text-sm text-muted-foreground mb-4">Crie seu negócio para começar o teste gratuito de cinco dias.</p>
-          <Button asChild><Link to="/onboarding">Criar minha agenda</Link></Button>
+          <CardTitle className="mb-2">
+            {isMaster ? 'Nenhuma conta cadastrada ainda' : 'Sua conta ainda não tem uma agenda'}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mb-4">
+            {isMaster
+              ? 'Quando alguém criar uma agenda, ela aparecerá aqui e no Painel Master.'
+              : 'Crie seu negócio para começar o teste gratuito de cinco dias.'}
+          </p>
+          <Button asChild>
+            <Link to={isMaster ? '/master' : '/onboarding'}>
+              {isMaster ? 'Abrir Painel Master' : 'Criar minha agenda'}
+            </Link>
+          </Button>
         </Card>
       </div>
     );
   }
 
-  const selectedTenant = currentTenant && user?.ownedTenantIds.includes(currentTenant.id)
-    ? currentTenant
-    : ownedTenant;
+  const selectedTenant = isMaster
+    ? (currentTenant ?? ownedTenant)
+    : currentTenant && user?.ownedTenantIds.includes(currentTenant.id)
+      ? currentTenant
+      : ownedTenant;
 
   if (
-    selectedTenant.subscription_status === 'expired'
-    || selectedTenant.subscription_status === 'past_due'
-    || selectedTenant.subscription_status === 'canceled'
-    || (selectedTenant.subscription_status === 'trial'
-      && Date.parse(selectedTenant.trial_ends_at) <= Date.now())
+    !isMaster
+    && (
+      selectedTenant.subscription_status === 'expired'
+      || selectedTenant.subscription_status === 'past_due'
+      || selectedTenant.subscription_status === 'canceled'
+      || (selectedTenant.subscription_status === 'trial'
+        && Date.parse(selectedTenant.trial_ends_at) <= Date.now())
+    )
   ) {
     return <Navigate to="/planos" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+/**
+ * Protege rotas exclusivas do super admin da plataforma.
+ */
+export const MasterProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading, membershipsLoading, isMaster } = useAuth();
+  const location = useLocation();
+
+  if (isLoading || membershipsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  if (!isMaster) {
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;

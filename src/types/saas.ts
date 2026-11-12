@@ -49,6 +49,34 @@ export interface Appointment {
   created_at: string;
 }
 
+export interface MasterAccountRow {
+  tenant_id: string;
+  name: string;
+  slug: string;
+  segment: string;
+  plan: Tenant['plan'];
+  subscription_status: Tenant['subscription_status'];
+  trial_ends_at: string;
+  created_at: string;
+  owner_email: string | null;
+  owner_name: string | null;
+  services_count: number;
+  professionals_count: number;
+  appointments_count: number;
+  clients_count: number;
+  revenue_total: number;
+}
+
+export interface MasterUserRow {
+  user_id: string;
+  email: string;
+  full_name: string;
+  created_at: string;
+  last_sign_in_at: string | null;
+  is_master: boolean;
+  tenant_count: number;
+}
+
 export interface Tenant {
   id: string;
   slug: string;

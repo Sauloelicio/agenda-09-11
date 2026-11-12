@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SaasProvider } from "@/contexts/SaasContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { AdminProtectedRoute, ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminProtectedRoute, MasterProtectedRoute, ProtectedRoute } from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import Onboarding from "./pages/Onboarding";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -15,6 +15,7 @@ import LoginPage from "./pages/LoginPage";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PlansPage from "./pages/PlansPage";
+import MasterDashboard from "./pages/MasterDashboard";
 import DemoBar from "./components/DemoBar";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,16 @@ const App = () => (
                   <AdminProtectedRoute>
                     <AdminDashboard />
                   </AdminProtectedRoute>
+                }
+              />
+
+              {/* Painel Master — somente super admin da plataforma */}
+              <Route
+                path="/master"
+                element={
+                  <MasterProtectedRoute>
+                    <MasterDashboard />
+                  </MasterProtectedRoute>
                 }
               />
 

@@ -19,7 +19,8 @@ import {
   LogOut, 
   MessageSquare,
   AlertCircle,
-  ChevronDown
+  ChevronDown,
+  Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -276,6 +277,15 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                 Ver Agendamento
               </Link>
             </Button>
+
+            {!demoMode && user?.isMaster && (
+              <Button size="sm" variant="outline" asChild className="h-9 text-xs border-primary/30 text-primary">
+                <Link to="/master">
+                  <Crown className="h-3.5 w-3.5 mr-1.5" />
+                  Painel Master
+                </Link>
+              </Button>
+            )}
 
             {demoMode ? (
               <Button size="sm" variant="ghost" asChild className="text-xs h-9 text-muted-foreground">
