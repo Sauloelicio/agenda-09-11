@@ -27,6 +27,30 @@ interface AuthResult {
   requiresEmailConfirmation?: boolean;
 }
 
+/** Traduz os erros mais comuns do Supabase Auth para mensagens acionáveis. */
+const friendlyAuthError = (message: string): string => {
+  const m = message.toLowerCase();
+  if (m.includes('invalid login credentials')) {
+    return 'E-mail ou senha incorretos. Confira se o navegador não preencheu a senha sozinho e digite novamente.';
+  }
+  if (m.includes('email not confirmed')) {
+    return 'Seu e-mail ainda não foi confirmado. Abra o link que enviamos (verifique também a caixa de spam).';
+  }
+  if (m.includes('user already registered') || m.includes('already been registered')) {
+    return 'Este e-mail já está cadastrado. Use a opção "Entrar".';
+  }
+  if (m.includes('rate limit') || m.includes('too many requests') || m.includes('for security purposes')) {
+    return 'Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente novamente.';
+  }
+  if (m.includes('weak password') || m.includes('password should be at least')) {
+    return 'Senha muito fraca. Use pelo menos 8 caracteres, combinando letras e números.';
+  }
+  if (m.includes('invalid format') || m.includes('unable to validate email')) {
+    return 'E-mail inválido. Confira o endereço e tente novamente.';
+  }
+  return message;
+};
+
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
@@ -152,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     });
 
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: friendlyAuthError(error.message) };
     return { success: true, requiresEmailConfirmation: !data.session };
   }, []);
 
@@ -165,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: email.trim().toLowerCase(),
       password,
     });
-    return error ? { success: false, error: error.message } : { success: true };
+    return error ? { success: false, error: friendlyAuthError(error.message) } : { success: true };
   }, []);
 
   const logout = useCallback(async (): Promise<AuthResult> => {
@@ -179,7 +203,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
       redirectTo: `${window.location.origin}/login?mode=recovery`,
     });
-    return error ? { success: false, error: error.message } : { success: true };
+    return error ? { success: false, error: friendlyAuthError(error.message) } : { success: true };
   }, []);
 
   const updatePassword = useCallback(async (password: string): Promise<AuthResult> => {
@@ -189,7 +213,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { error } = await supabase.auth.updateUser({ password });
     if (!error) setIsPasswordRecovery(false);
-    return error ? { success: false, error: error.message } : { success: true };
+    return error ? { success: false, error: friendlyAuthError(error.message) } : { success: true };
   }, []);
 
   const reloadOwnedTenants = useCallback(async () => {
