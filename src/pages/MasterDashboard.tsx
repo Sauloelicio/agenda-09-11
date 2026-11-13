@@ -269,6 +269,55 @@ const MasterDashboard: React.FC = () => {
     await loadData();
   };
 
+  const deleteUser = async (row: MasterUserRow) => {
+    if (row.user_id === user?.id) {
+      toast.error('Você não pode excluir a própria conta.');
+      return;
+    }
+    if (row.is_master) {
+      toast.error('Remova o acesso master antes de excluir este usuário.');
+      return;
+    }
+
+    const ownedAccounts = Number(row.tenant_count) || 0;
+    const warning = ownedAccounts > 0
+      ? `\n\nATENÇÃO: ${ownedAccounts} conta(s) da qual este usuário é o único dono também será(ão) apagada(s), com agendamentos, clientes e serviços.`
+      : '';
+    const confirmation = window.prompt(
+      `Excluir definitivamente o usuário ${row.email}?${warning}\n\nDigite o e-mail para confirmar:`,
+    );
+    if (confirmation === null) return;
+    if (confirmation.trim().toLowerCase() !== row.email.trim().toLowerCase()) {
+      toast.error('E-mail não confere. Exclusão cancelada.');
+      return;
+    }
+
+    setBusyId(row.user_id);
+    const { data, error: rpcError } = await supabase.rpc('master_delete_user', {
+      _user_id: row.user_id,
+    });
+    setBusyId(null);
+
+    if (rpcError) {
+      console.error('master_delete_user failed:', rpcError.message);
+      toast.error(rpcError.message.includes('cannot_delete_self')
+        ? 'Você não pode excluir a própria conta.'
+        : rpcError.message.includes('cannot_delete_master')
+          ? 'Remova o acesso master antes de excluir este usuário.'
+          : rpcError.message.includes('user_not_found')
+            ? 'Usuário não encontrado.'
+            : 'Não foi possível excluir o usuário.');
+      return;
+    }
+
+    const deletedTenants = Number((data as { deleted_tenants?: number } | null)?.deleted_tenants) || 0;
+    toast.success(deletedTenants > 0
+      ? `Usuário excluído junto com ${deletedTenants} conta(s).`
+      : 'Usuário excluído.');
+    await loadData();
+    await reloadOwnedTenants();
+  };
+
   const handleLogout = async () => {
     const result = await logout();
     if (!result.success) {
@@ -575,7 +624,7 @@ const MasterDashboard: React.FC = () => {
               <CardHeader className="py-4">
                 <CardTitle className="text-base">Usuários da plataforma</CardTitle>
                 <CardDescription>
-                  Conceda ou remova o acesso master. A plataforma nunca fica sem pelo menos um master.
+                  Conceda ou remova o acesso master e exclua usuários. Contas em que o usuário é o único dono são apagadas junto.
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
@@ -619,15 +668,31 @@ const MasterDashboard: React.FC = () => {
                           <TableCell className="text-xs text-muted-foreground">{dateLabel(row.created_at)}</TableCell>
                           <TableCell className="text-xs text-muted-foreground">{dateLabel(row.last_sign_in_at)}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              variant={row.is_master ? 'outline' : 'default'}
-                              className="h-8 text-xs"
-                              onClick={() => void toggleMaster(row)}
-                              disabled={busyId === row.user_id || row.user_id === user?.id}
-                            >
-                              {row.is_master ? 'Remover master' : 'Tornar master'}
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant={row.is_master ? 'outline' : 'default'}
+                                className="h-8 text-xs"
+                                onClick={() => void toggleMaster(row)}
+                                disabled={busyId === row.user_id || row.user_id === user?.id}
+                              >
+                                {row.is_master ? 'Remover master' : 'Tornar master'}
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                title={row.is_master
+                                  ? 'Remova o acesso master antes de excluir'
+                                  : 'Excluir usuário definitivamente'}
+                                onClick={() => void deleteUser(row)}
+                                disabled={busyId === row.user_id || row.user_id === user?.id || row.is_master}
+                              >
+                                {busyId === row.user_id
+                                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                                  : <Trash2 className="h-4 w-4" />}
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

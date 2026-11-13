@@ -446,6 +446,7 @@ export type Database = {
         Returns: undefined
       }
       master_delete_tenant: { Args: { _tenant_id: string }; Returns: undefined }
+      master_delete_user: { Args: { _user_id: string }; Returns: Json }
       master_set_master: { Args: { _user_id: string; _enabled: boolean }; Returns: undefined }
       get_tenant_occupied_slots: {
         Args: { _date: string; _professional_id?: string | null; _service_id: string; _tenant_id: string }

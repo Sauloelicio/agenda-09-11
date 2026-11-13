@@ -202,14 +202,18 @@ camada de super admin da plataforma.
   `/master` (link "Painel Master" também aparece no cabeçalho de `/admin`).
 - No painel é possível: ver métricas de todas as contas, alterar plano/status/
   validade do teste, abrir o painel de qualquer conta, transferir a
-  propriedade, excluir a conta com todos os dados e conceder/remover master.
+  propriedade, excluir a conta com todos os dados, conceder/remover master e
+  excluir usuários definitivamente (as contas em que ele é o único dono são
+  apagadas junto).
 - O master não depende de `tenant_members`: `is_tenant_member()`,
   `tenant_has_access()` e `has_role()` passam a liberar acesso total para ele.
   Usuários comuns continuam isolados pelo RLS.
 - Escritas sensíveis passam por RPCs `SECURITY DEFINER` que exigem
   `is_master()`: `master_list_accounts`, `master_list_users`,
   `master_set_subscription`, `master_set_tenant_owner`,
-  `master_delete_tenant` e `master_set_master`.
+  `master_delete_tenant`, `master_delete_user` e `master_set_master`.
+- A exclusão de usuário nunca permite apagar a própria conta nem outro master
+  (é preciso remover o papel master antes).
 - A conta master entra automaticamente em `master_admins` quando é criada
   (trigger em `auth.users`); a migration também vincula a conta se ela já
   existir.
