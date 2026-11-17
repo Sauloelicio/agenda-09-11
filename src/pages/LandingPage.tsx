@@ -79,14 +79,21 @@ export const LandingPage = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild className="hidden text-white/75 hover:bg-white/10 hover:text-white sm:inline-flex">
-              <Link to="/login">Entrar na minha conta</Link>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="h-10 border-white/25 bg-white/5 px-4 text-sm font-semibold text-white/90 hover:border-white/40 hover:bg-white/15 hover:text-white sm:h-9 sm:border-transparent sm:bg-transparent sm:px-4 sm:font-medium sm:text-white/75"
+            >
+              <Link to="/login">
+                <span className="sm:hidden">Entrar</span>
+                <span className="hidden sm:inline">Entrar na minha conta</span>
+              </Link>
             </Button>
-            <Button size="sm" className="h-10 bg-[#c5a572] px-3 font-semibold text-[#211e1b] shadow-md shadow-black/20 hover:bg-[#d4b989] sm:px-4" asChild>
+            <Button size="sm" className="hidden h-10 bg-[#c5a572] px-4 font-semibold text-[#211e1b] shadow-md shadow-black/20 hover:bg-[#d4b989] sm:inline-flex" asChild>
               <Link to="/onboarding">
-                <span className="sm:hidden">Começar</span>
-                <span className="hidden sm:inline">Criar conta grátis</span>
-                <ArrowRight className="ml-1.5 hidden h-4 w-4 sm:block" />
+                Criar conta grátis
+                <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
           </div>
