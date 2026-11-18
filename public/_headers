@@ -1,0 +1,14 @@
+# Arquivos com hash no nome (index-XXXX.js/css): cache imutavel por 1 ano
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML sempre revalidado, para o deploy novo aparecer na hora
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Seguranca basica em todas as respostas
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()

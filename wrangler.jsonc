@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Nome do Worker criado em Workers & Pages.
+  // Se o seu projeto tiver outro nome no dashboard, troque aqui pelo mesmo nome.
+  "name": "agenda-09-11",
+  "compatibility_date": "2026-11-18",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "./dist",
+    // SPA: qualquer rota que não exista em ./dist cai no index.html (sem 404)
+    "not_found_handling": "single-page-application"
+  }
+}
