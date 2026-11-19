@@ -93,6 +93,13 @@ export interface Tenant {
   subscription_status?: 'trial' | 'active' | 'expired' | 'past_due' | 'canceled';
   trial_started_at?: string;
   trial_ends_at: string; // ISO date
+  billing_customer_id?: string | null;
+  billing_subscription_id?: string | null;
+  billing_checkout_id?: string | null;
+  billing_method?: 'CARD' | 'PIX' | null;
+  billing_tax_id?: string | null;
+  current_period_end?: string | null;
+  billing_reminder_stage?: number;
   settings: BusinessSettings;
   created_at: string;
 }

@@ -23,7 +23,6 @@ import { useSaas } from '@/contexts/SaasContext';
 export const LandingPage = () => {
   const navigate = useNavigate();
   const { tenants, setCurrentTenant } = useSaas();
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [activeDemoStep, setActiveDemoStep] = useState(0);
   const [activeDemoCard, setActiveDemoCard] = useState(0);
   const demoTrackRef = useRef<HTMLDivElement>(null);
@@ -479,24 +478,9 @@ export const LandingPage = () => {
               Comece com 5 dias gratuitos sem cartão. Escolha o plano depois de ver os agendamentos entrando.
             </p>
 
-            {/* Billing toggle */}
-            <div className="flex items-center justify-center gap-3 mt-6">
-              <span className={`text-sm ${billingCycle === 'monthly' ? 'font-bold text-[#f5f1e8]' : 'text-white/50'}`}>
-                Mensal
-              </span>
-              <button
-                type="button"
-                onClick={() => setBillingCycle(c => c === 'monthly' ? 'yearly' : 'monthly')}
-                aria-label="Alternar cobrança mensal ou anual"
-                aria-pressed={billingCycle === 'yearly'}
-                className="relative h-6 w-12 rounded-full bg-[#8d774f] p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8bd90]"
-              >
-                <div className={`h-4 w-4 rounded-full bg-[#f5f1e8] transition-transform ${billingCycle === 'yearly' ? 'translate-x-6' : 'translate-x-0'}`} />
-              </button>
-              <span className={`flex items-center gap-1.5 text-sm ${billingCycle === 'yearly' ? 'font-bold text-[#f5f1e8]' : 'text-white/50'}`}>
-                Anual <Badge variant="outline" className="border-emerald-400/20 bg-emerald-400/10 text-xs font-bold text-emerald-300">2 meses grátis</Badge>
-              </span>
-            </div>
+            <p className="mt-4 text-xs text-white/45">
+              Valores mensais. Teste grátis de 5 dias no cartão · Pix Automático com cobrança imediata.
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 items-stretch">
@@ -507,7 +491,7 @@ export const LandingPage = () => {
                 <p className="text-xs text-white/55">Para profissionais autônomos e manicures.</p>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-extrabold text-[#f5f1e8]">
-                    R$ {billingCycle === 'monthly' ? '49' : '39'}
+                    R$ 29,90
                   </span>
                   <span className="text-xs text-white/50">/mês</span>
                 </div>
@@ -536,7 +520,7 @@ export const LandingPage = () => {
                 <p className="text-xs text-white/55">Para barbearias, estúdios e equipes.</p>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-extrabold text-[#f5f1e8]">
-                    R$ {billingCycle === 'monthly' ? '89' : '72'}
+                    R$ 59,90
                   </span>
                   <span className="text-xs text-white/50">/mês</span>
                 </div>
@@ -562,7 +546,7 @@ export const LandingPage = () => {
                 <p className="text-xs text-white/55">Para academias, box de cross e estúdios coletivos.</p>
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-extrabold text-[#f5f1e8]">
-                    R$ {billingCycle === 'monthly' ? '149' : '119'}
+                    R$ 119,90
                   </span>
                   <span className="text-xs text-white/50">/mês</span>
                 </div>

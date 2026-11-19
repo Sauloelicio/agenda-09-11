@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Calendar, 
   Clock, 
@@ -35,6 +35,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { BillingBanner } from '@/components/BillingBanner';
 
 const DAYS = [
   { id: 0, label: 'Dom' },
@@ -48,6 +49,7 @@ const DAYS = [
 
 export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, logout } = useAuth();
   const { 
     tenants, 
@@ -119,10 +121,20 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
 
   const metrics = getTenantMetrics(currentTenant.id);
   const clientBookingUrl = `${window.location.origin}/${currentTenant.slug}`;
+  const subscriptionStatus = currentTenant.subscription_status ?? 'trial';
+  const isBlockedSubscription = ['expired', 'past_due', 'canceled'].includes(subscriptionStatus);
   const trialDaysRemaining = Math.max(
     0,
     Math.ceil((Date.parse(currentTenant.trial_ends_at) - Date.now()) / (24 * 60 * 60 * 1000))
   );
+
+  // Retorno do checkout da Abacate Pay: o webhook confirma a assinatura em instantes.
+  useEffect(() => {
+    if (demoMode || searchParams.get('billing') !== 'return') return;
+    toast.success('Pagamento enviado! Estamos confirmando sua assinatura.');
+    searchParams.delete('billing');
+    setSearchParams(searchParams, { replace: true });
+  }, [demoMode, searchParams, setSearchParams]);
 
   const copyLink = () => {
     navigator.clipboard.writeText(clientBookingUrl);
@@ -250,13 +262,28 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="hidden md:inline-flex bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs font-semibold gap-1 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <Badge
+              variant="outline"
+              className={`hidden md:inline-flex text-xs font-semibold gap-1 py-1 ${
+                demoMode || subscriptionStatus === 'active'
+                  ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+                  : isBlockedSubscription
+                    ? 'bg-destructive/10 text-destructive border-destructive/20'
+                    : trialDaysRemaining <= 2
+                      ? 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+                      : 'bg-primary/10 text-primary border-primary/20'
+              }`}
+            >
+              <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${
+                isBlockedSubscription && !demoMode ? 'bg-destructive' : 'bg-emerald-500'
+              }`} />
               {demoMode
                 ? 'Demonstração fictícia'
-                : currentTenant.subscription_status === 'active'
+                : subscriptionStatus === 'active'
                   ? 'Assinatura ativa'
-                  : `Teste grátis · ${trialDaysRemaining} ${trialDaysRemaining === 1 ? 'dia' : 'dias'}`}
+                  : isBlockedSubscription
+                    ? 'Assinatura suspensa'
+                    : `Teste grátis · ${trialDaysRemaining} ${trialDaysRemaining === 1 ? 'dia' : 'dias'}`}
             </Badge>
 
             {/* Nome do usuário logado */}
@@ -313,6 +340,8 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
 
       {/* Main Content Area */}
       <main className="container mx-auto px-4 pt-6 max-w-6xl space-y-6">
+        <BillingBanner tenant={currentTenant} demoMode={demoMode} />
+
         {/* Banner with Customer Link */}
         <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
           <div className="space-y-1">

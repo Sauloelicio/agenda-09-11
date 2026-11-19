@@ -234,8 +234,8 @@ export const Onboarding = () => {
 
       sessionStorage.removeItem('onboarding_draft_v1');
       await reloadOwnedTenants();
-      toast.success('Agenda criada! Seu teste de cinco dias começou.');
-      navigate('/admin', { replace: true });
+      toast.success('Agenda criada! Escolha como quer continuar com o teste de cinco dias.');
+      navigate('/planos?welcome=1', { replace: true });
     } catch (error) {
       console.error('Tenant creation failed:', error);
       toast.error('Não foi possível criar sua agenda. Tente novamente.');

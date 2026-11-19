@@ -242,6 +242,13 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
           subscription_status: tenant.subscription_status as Tenant['subscription_status'],
           trial_started_at: tenant.trial_started_at,
           trial_ends_at: tenant.trial_ends_at,
+          billing_customer_id: tenant.billing_customer_id ?? null,
+          billing_subscription_id: tenant.billing_subscription_id ?? null,
+          billing_checkout_id: tenant.billing_checkout_id ?? null,
+          billing_method: tenant.billing_method ?? null,
+          billing_tax_id: tenant.billing_tax_id ?? null,
+          current_period_end: tenant.current_period_end ?? null,
+          billing_reminder_stage: tenant.billing_reminder_stage ?? 0,
           created_at: tenant.created_at,
           settings: row ? {
             open_time: row.open_time,
