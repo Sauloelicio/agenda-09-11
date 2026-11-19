@@ -7,7 +7,6 @@ import {
   Eye,
   EyeOff,
   ArrowLeft,
-  Calendar,
   Sparkles,
   ShieldCheck,
 } from 'lucide-react';
@@ -39,8 +38,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ redirectTo }) => {
     isLoading: isAuthLoading,
   } = useAuth();
 
-  // Permite passar ?mode=register na URL
+  // Permite passar ?mode=register na URL. ?force=1 (usado pelo botão
+  // "Entrar" da landing) exibe o login mesmo quando já existe sessão ativa.
   const searchParams = new URLSearchParams(location.search);
+  const forceLogin = searchParams.get('force') === '1';
   const initialMode: Mode = searchParams.get('mode') === 'register'
     ? 'register'
     : searchParams.get('mode') === 'recovery' ? 'recovery' : 'login';
@@ -64,10 +65,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ redirectTo }) => {
     || (sessionStorage.getItem('onboarding_draft_v1') ? '/onboarding?complete=1' : '/admin');
 
   React.useEffect(() => {
-    if (!isAuthLoading && isAuthenticated && !isPasswordRecovery && initialMode !== 'recovery') {
+    if (!forceLogin && !isAuthLoading && isAuthenticated && !isPasswordRecovery && initialMode !== 'recovery') {
       navigate(destination, { replace: true });
     }
-  }, [destination, initialMode, isAuthLoading, isAuthenticated, isPasswordRecovery, navigate]);
+  }, [destination, forceLogin, initialMode, isAuthLoading, isAuthenticated, isPasswordRecovery, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,9 +160,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ redirectTo }) => {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 mb-3">
-            <Calendar className="h-7 w-7 text-primary" />
+            <img src="/logo.png" alt="agendaresolvida" className="h-7 w-7 object-contain" />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">AgendaFácil</h1>
+          <h1 className="text-2xl font-bold tracking-tight">agendaresolvida</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {mode === 'login'
               ? 'Entre na sua conta para gerenciar sua agenda'

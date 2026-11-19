@@ -64,11 +64,9 @@ export const LandingPage = () => {
       <header className="sticky top-0 z-50 border-b border-[#3b352b] bg-[#171613]/95 text-[#f5f1e8] backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-[#c5a572] flex items-center justify-center text-[#211e1b] shadow-md shadow-black/20">
-              <Calendar className="h-5 w-5" />
-            </div>
+            <img src="/logo.png" alt="agendaresolvida" className="h-9 w-9 object-contain" />
             <span className="font-bold text-xl tracking-tight text-[#f5f1e8]">
-              Agendou<span className="font-black text-[#d8bd90]">.SaaS</span>
+              agenda<span className="font-black text-[#d8bd90]">resolvida</span>
             </span>
           </div>
 
@@ -85,7 +83,7 @@ export const LandingPage = () => {
               asChild
               className="h-10 border-white/25 bg-white/5 px-4 text-sm font-semibold text-white/90 hover:border-white/40 hover:bg-white/15 hover:text-white sm:h-9 sm:border-transparent sm:bg-transparent sm:px-4 sm:font-medium sm:text-white/75"
             >
-              <Link to="/login">
+              <Link to="/login?force=1">
                 <span className="sm:hidden">Entrar</span>
                 <span className="hidden sm:inline">Entrar na minha conta</span>
               </Link>
@@ -271,7 +269,7 @@ export const LandingPage = () => {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
             <Badge variant="outline" className="mb-3 border-[#c5a572]/40 bg-[#c5a572]/10 text-[#e2c89c]">Escolha uma experiência</Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#f5f1e8]">Veja o Agendou no seu segmento</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#f5f1e8]">Veja o agendaresolvida no seu segmento</h2>
             <p className="hidden sm:block text-white/60 mt-2">
               Explore demonstrações interativas com dados fictícios e descubra como cada agenda pode funcionar.
             </p>
@@ -590,8 +588,8 @@ export const LandingPage = () => {
       <footer className="mt-auto border-t border-[#3b352b] bg-[#171613] py-8 text-center text-xs text-white/50">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-[#d8bd90]" />
-            <span className="font-semibold text-[#f5f1e8]">Agendou.SaaS</span> - Plataforma de agendamentos
+            <img src="/logo.png" alt="" className="h-4 w-4 object-contain" />
+            <span className="font-semibold text-[#f5f1e8]">agendaresolvida</span> - Plataforma de agendamentos
           </div>
           <p>© 2026 Todos os direitos reservados. Feito para alta conversão.</p>
         </div>

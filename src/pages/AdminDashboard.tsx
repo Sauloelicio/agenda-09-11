@@ -210,10 +210,8 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                <Calendar className="h-4 w-4" />
-              </div>
-              <span className="font-bold text-lg hidden sm:inline">Agendou<span className="text-primary font-black">.SaaS</span></span>
+              <img src="/logo.png" alt="agendaresolvida" className="h-8 w-8 object-contain" />
+              <span className="font-bold text-lg hidden sm:inline">agenda<span className="text-primary font-black">resolvida</span></span>
             </Link>
 
             <div className="h-5 w-px bg-border mx-1 hidden sm:block" />
