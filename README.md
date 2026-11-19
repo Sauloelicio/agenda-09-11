@@ -76,6 +76,11 @@ Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-trick
 
 ## Desenvolvimento local com Supabase (Docker)
 
+> **Guias locais:** [COMANDOS_RAPIDOS.md](docs/COMANDOS_RAPIDOS.md) (cartão de
+> comandos) e [EXECUCAO_LOCAL_POSTGRES.md](docs/EXECUCAO_LOCAL_POSTGRES.md)
+> (guia completo). Scripts: `dev.sh` / `dev.ps1` para subir somente a
+> aplicação, somente o banco, ambos, e os respectivos restarts.
+
 O projeto usa Supabase (Auth + PostgREST) e não funciona apenas com Postgres puro.
 Para rodar tudo localmente é necessário o **Supabase CLI** e o **Docker**.
 

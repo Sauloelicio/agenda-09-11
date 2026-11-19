@@ -1,7 +1,7 @@
 @echo off
 title Iniciando Agendou SaaS
 echo ========================================================
-echo   Iniciando o Servidor de Desenvolvimento do SaaS...
+echo   Iniciando o SaaS (banco local + Vite)...
 echo ========================================================
 echo [INFO] O Vite roda dentro do WSL (filesystem nativo).
 echo [INFO] Abra http://localhost:5173 no navegador.
