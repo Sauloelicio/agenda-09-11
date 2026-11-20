@@ -94,6 +94,7 @@ export type Database = {
           service_minutes: number
           slot_interval_minutes: number
           open_weekdays: number[]
+          booking_mode: string
           updated_at: string
         },
         {
@@ -105,6 +106,7 @@ export type Database = {
           service_minutes?: number
           slot_interval_minutes?: number
           open_weekdays?: number[]
+          booking_mode?: string
           updated_at?: string
         },
         {
@@ -115,6 +117,7 @@ export type Database = {
           service_minutes?: number
           slot_interval_minutes?: number
           open_weekdays?: number[]
+          booking_mode?: string
           updated_at?: string
         }
       >
@@ -375,6 +378,7 @@ export type Database = {
       }
       create_tenant_with_owner: {
         Args: {
+          _booking_mode?: string
           _close_time: string
           _lunch_end: string | null
           _lunch_start: string | null
@@ -451,6 +455,10 @@ export type Database = {
       get_tenant_occupied_slots: {
         Args: { _date: string; _professional_id?: string | null; _service_id: string; _tenant_id: string }
         Returns: string[]
+      }
+      get_tenant_day_availability: {
+        Args: { _date: string; _professional_id?: string | null; _service_id: string; _tenant_id: string }
+        Returns: number
       }
       tenant_has_access: { Args: { _tenant_id: string }; Returns: boolean }
       update_tenant_appointment: {

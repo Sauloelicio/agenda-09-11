@@ -9,6 +9,7 @@ export interface BusinessSettings {
   service_minutes: number;
   slot_interval_minutes: number;
   open_weekdays: number[]; // 0=Dom, 1=Seg, ..., 6=Sab
+  booking_mode: 'time' | 'day'; // time = grade de horários; day = cliente escolhe só a data
 }
 
 export interface Service {

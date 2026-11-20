@@ -85,6 +85,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
   const [newProPhone, setNewProPhone] = useState('');
 
   // Settings form local state
+  const [bookingMode, setBookingMode] = useState<'time' | 'day'>(currentTenant?.settings.booking_mode || 'time');
   const [openTime, setOpenTime] = useState(currentTenant?.settings.open_time || '09:00');
   const [closeTime, setCloseTime] = useState(currentTenant?.settings.close_time || '19:00');
   const [lunchStart, setLunchStart] = useState(currentTenant?.settings.lunch_start || '');
@@ -98,6 +99,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
 
   useEffect(() => {
     if (!currentTenant) return;
+    setBookingMode(currentTenant.settings.booking_mode);
     setOpenTime(currentTenant.settings.open_time);
     setCloseTime(currentTenant.settings.close_time);
     setLunchStart(currentTenant.settings.lunch_start || '');
@@ -186,13 +188,14 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     try {
       await updateTenantSettings(currentTenant.id, {
         ...currentTenant.settings,
+        booking_mode: bookingMode,
         open_time: openTime,
         close_time: closeTime,
         lunch_start: lunchStart || null,
         lunch_end: lunchEnd || null,
         open_weekdays: openWeekdays,
       });
-      toast.success('Horários de funcionamento atualizados!');
+      toast.success('Configurações da agenda atualizadas!');
     } catch (error) {
       console.error('Unable to save business hours:', error);
       toast.error('Não foi possível salvar os horários. Verifique o período de acesso e tente novamente.');
@@ -497,8 +500,12 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                 ) : (
                   <div className="space-y-3">
                     {filteredAppointments.map((appt) => {
+                      const isDayAppt = appt.time === '00:00';
+                      const scheduleText = isDayAppt
+                        ? `no dia ${appt.date.split('-').reverse().join('/')} (dia inteiro)`
+                        : `hoje às ${appt.time}`;
                       const whatsappText = encodeURIComponent(
-                        `Olá, ${appt.client_name}! Confirmando seu horário hoje às ${appt.time} para ${appt.service_name} aqui na ${currentTenant.name}. Te esperamos!`
+                        `Olá, ${appt.client_name}! Confirmando seu agendamento ${scheduleText} para ${appt.service_name} aqui na ${currentTenant.name}. Te esperamos!`
                       );
                       const whatsappHref = `https://wa.me/55${appt.client_phone.replace(/^55/, '')}?text=${whatsappText}`;
 
@@ -508,8 +515,8 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                           className="p-3.5 rounded-xl border border-border bg-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-primary/40 transition-colors"
                         >
                           <div className="flex items-start gap-3">
-                            <div className="h-10 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
-                              {appt.time}
+                            <div className="h-10 w-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px] text-center leading-tight shrink-0">
+                              {isDayAppt ? 'Dia' : appt.time}
                             </div>
                             <div>
                               <div className="flex items-center gap-2">
@@ -811,14 +818,53 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
           <TabsContent value="hours" className="space-y-4">
             <Card className="border-border">
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Expediente e Horários</CardTitle>
+                <CardTitle className="text-lg">Modo da Agenda e Expediente</CardTitle>
                 <CardDescription className="text-xs">
-                  Os slots de agendamento exibidos para seus clientes são calculados com base nestas regras.
+                  Escolha como seus clientes agendam e defina os dias disponíveis. O padrão é por horário.
                 </CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold">Como seus clientes agendam?</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBookingMode('time')}
+                      className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
+                        bookingMode === 'time'
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                          : 'border-border hover:border-primary/40'
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">Por horário</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        Cliente escolhe data e horário na grade.
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBookingMode('day')}
+                      className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors ${
+                        bookingMode === 'day'
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                          : 'border-border hover:border-primary/40'
+                      }`}
+                    >
+                      <span className="text-xs font-semibold">Por dia</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        Cliente escolhe só a data; cada serviço tem suas vagas por dia.
+                      </span>
+                    </button>
+                  </div>
+                  {bookingMode === 'day' && (
+                    <p className="rounded-lg bg-primary/5 p-2.5 text-[11px] text-muted-foreground">
+                      No modo por dia não há grade de horários, almoço ou agendamentos que atravessam dias.
+                    </p>
+                  )}
+                </div>
+
+                <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3 ${bookingMode === 'day' ? 'hidden' : ''}`}>
                   <div className="space-y-1">
                     <Label className="text-xs">Início Expediente</Label>
                     <Input
@@ -878,7 +924,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                 </div>
 
                 <Button onClick={handleSaveSettings} className="font-semibold">
-                  Salvar Alterações de Horário
+                  Salvar Alterações da Agenda
                 </Button>
               </CardContent>
             </Card>

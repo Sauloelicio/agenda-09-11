@@ -97,6 +97,15 @@ interface SaasContextType {
     settings: BusinessSettings;
     professionalId?: string;
   }) => Promise<{ time: string; remainingCapacity: number }[]>;
+  getDayAvailability: (params: {
+    tenantId: string;
+    date: Date;
+    serviceId: string;
+    maxCapacity: number;
+    settings: BusinessSettings;
+    professionalId?: string;
+    isRemote: boolean;
+  }) => Promise<number>;
   
   // Metrics helper for dashboard
   getTenantMetrics: (tenantId: string) => {
@@ -258,6 +267,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
             service_minutes: row.service_minutes,
             slot_interval_minutes: row.slot_interval_minutes,
             open_weekdays: row.open_weekdays,
+            booking_mode: row.booking_mode === 'day' ? 'day' : 'time',
           } : {
             open_time: '09:00',
             close_time: '18:00',
@@ -266,6 +276,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
             service_minutes: 60,
             slot_interval_minutes: 30,
             open_weekdays: [1, 2, 3, 4, 5, 6],
+            booking_mode: 'time',
           },
         };
       });
@@ -402,6 +413,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         service_minutes: requiredNumber(settingsRecord, 'service_minutes'),
         slot_interval_minutes: requiredNumber(settingsRecord, 'slot_interval_minutes'),
         open_weekdays: weekdayValue,
+        booking_mode: settingsRecord.booking_mode === 'day' ? 'day' : 'time',
       },
     };
 
@@ -654,6 +666,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }) => {
     const tenant = tenants.find((t) => t.id === tenantId);
     if (!tenant) return [];
+    if (tenant.settings.booking_mode === 'day') return [];
 
     const baseSlots = generateSlots(tenant.settings, date);
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -710,6 +723,8 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     settings: BusinessSettings;
     professionalId?: string;
   }) => {
+    if (settings.booking_mode === 'day') return [];
+
     const dateStr = format(date, 'yyyy-MM-dd');
     const { data: occupiedTimes, error } = await supabase.rpc('get_tenant_occupied_slots', {
       _tenant_id: tenantId,
@@ -724,6 +739,47 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .filter((slot) => !isPastSlot(dateStr, slot, new Date()) && !occupied.has(slot))
       .map((time) => ({ time, remainingCapacity: maxCapacity }));
   }, []);
+
+  const getDayAvailability = useCallback(async ({
+    tenantId,
+    date,
+    serviceId,
+    maxCapacity,
+    settings,
+    isRemote,
+  }: {
+    tenantId: string;
+    date: Date;
+    serviceId: string;
+    maxCapacity: number;
+    settings: BusinessSettings;
+    professionalId?: string;
+    isRemote: boolean;
+  }) => {
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const isPast = dateStr < format(new Date(), 'yyyy-MM-dd');
+    if (isPast || !settings.open_weekdays.includes(date.getDay())) return 0;
+
+    if (isRemote) {
+      const { data, error } = await supabase.rpc('get_tenant_day_availability', {
+        _tenant_id: tenantId,
+        _date: dateStr,
+        _service_id: serviceId,
+        _professional_id: null,
+      });
+      if (error) throw new Error(error.message);
+      return typeof data === 'number' ? data : 0;
+    }
+
+    const busy = allAppointments.filter(
+      (appointment) =>
+        appointment.tenant_id === tenantId &&
+        appointment.service_id === serviceId &&
+        appointment.date === dateStr &&
+        appointment.status === 'active'
+    ).length;
+    return Math.max(0, maxCapacity - busy);
+  }, [allAppointments]);
 
   const bookAppointment = async ({
     tenantId,
@@ -783,6 +839,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const maxCap = service.max_capacity || 1;
     const cleanPhone = clientPhone.replace(/\D/g, '');
+    const isDayMode = tenants.find((tenant) => tenant.id === tenantId)?.settings.booking_mode === 'day';
 
     // Check capacity
     const existing = allAppointments.filter(
@@ -791,11 +848,20 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         a.date === date &&
         a.time === time &&
         a.status === 'active' &&
-        (maxCap > 1 ? a.service_id === serviceId : professionalId ? a.professional_id === professionalId : true)
+        (isDayMode || maxCap > 1
+          ? a.service_id === serviceId
+          : professionalId
+          ? a.professional_id === professionalId
+          : true)
     );
 
     if (existing.length >= maxCap) {
-      return { success: false, error: 'Este horário acabou de ser preenchido por outro cliente.' };
+      return {
+        success: false,
+        error: isDayMode
+          ? 'Este dia acabou de ser preenchido por outro cliente.'
+          : 'Este horário acabou de ser preenchido por outro cliente.',
+      };
     }
 
     const pro = professionalId ? allProfessionals.find((p) => p.id === professionalId) : undefined;
@@ -923,6 +989,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         rescheduleAppointment,
         getAvailableSlots,
         getRemoteAvailableSlots,
+        getDayAvailability,
         getTenantMetrics,
       }}
     >

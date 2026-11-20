@@ -10,8 +10,9 @@ import {
   Scissors, 
   Dumbbell, 
   Briefcase, 
-  Check, 
+  Check,
   Calendar,
+  CalendarDays,
   DollarSign,
   Paintbrush,
   Eye
@@ -135,6 +136,7 @@ export const Onboarding = () => {
   };
 
   // Business Hours
+  const [bookingMode, setBookingMode] = useState<'time' | 'day'>('time');
   const [openTime, setOpenTime] = useState('09:00');
   const [closeTime, setCloseTime] = useState('19:00');
   const [openWeekdays, setOpenWeekdays] = useState<number[]>([1, 2, 3, 4, 5, 6]);
@@ -199,6 +201,7 @@ export const Onboarding = () => {
     open_time: string;
     close_time: string;
     open_weekdays: number[];
+    booking_mode: 'time' | 'day';
     first_service_name: string;
     first_service_price: number;
     first_service_duration: number;
@@ -216,8 +219,9 @@ export const Onboarding = () => {
         _open_time: data.open_time,
         _close_time: data.close_time,
         _open_weekdays: data.open_weekdays,
-        _lunch_start: data.segment === 'gym' ? null : '12:00',
-        _lunch_end: data.segment === 'gym' ? null : '13:30',
+        _booking_mode: data.booking_mode,
+        _lunch_start: data.segment === 'gym' || data.booking_mode === 'day' ? null : '12:00',
+        _lunch_end: data.segment === 'gym' || data.booking_mode === 'day' ? null : '13:30',
         _service_name: data.first_service_name,
         _service_price: data.first_service_price,
         _service_duration: data.first_service_duration,
@@ -258,7 +262,11 @@ export const Onboarding = () => {
     }
 
     try {
-      const draft = JSON.parse(savedDraft) as Parameters<typeof submitTenant>[0];
+      const parsedDraft = JSON.parse(savedDraft) as Parameters<typeof submitTenant>[0];
+      const draft: Parameters<typeof submitTenant>[0] = {
+        ...parsedDraft,
+        booking_mode: parsedDraft.booking_mode === 'day' ? 'day' : 'time',
+      };
       draftCompletionStarted.current = true;
       void submitTenant(draft);
     } catch (error) {
@@ -292,6 +300,7 @@ export const Onboarding = () => {
       open_time: openTime,
       close_time: closeTime,
       open_weekdays: openWeekdays,
+      booking_mode: bookingMode,
       first_service_name: serviceName.trim(),
       first_service_price: Number(servicePrice) || 0,
       first_service_duration: Number(serviceDuration) || 60,
@@ -336,6 +345,10 @@ export const Onboarding = () => {
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Serviço</span>
                 <span className="text-right font-medium">{serviceName.trim()}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Como agenda</span>
+                <span className="text-right font-medium">{bookingMode === 'day' ? 'Por dia' : 'Por horário'}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Preço demonstrativo</span>
@@ -412,7 +425,7 @@ export const Onboarding = () => {
               {step === 1 && 'Dados do seu Negócio'}
               {step === 2 && 'Qual é o seu Segmento?'}
               {step === 3 && 'A cara do seu site'}
-              {step === 4 && 'Horários & Primeiro Serviço'}
+              {step === 4 && 'Agenda & Primeiro Serviço'}
             </CardTitle>
             <CardDescription className="text-sm">
               {step === 1 && 'Identifique sua empresa e escolha seu link exclusivo de agendamento.'}
@@ -718,35 +731,79 @@ export const Onboarding = () => {
             {/* STEP 4: Hours & First Service */}
             {step === 4 && (
               <form onSubmit={handleComplete} className="flex flex-col gap-4">
-                {/* Working hours */}
+                {/* Booking mode + working days */}
                 <div className="order-2 space-y-3 rounded-xl border border-border bg-muted/20 p-3.5 sm:order-1">
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    Expediente Básico
+                    <CalendarDays className="h-3.5 w-3.5" />
+                    Como seus clientes agendam?
                   </span>
-                  
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label htmlFor="open-time" className="text-xs">Abertura</Label>
-                      <Input
-                        id="open-time"
-                        type="time"
-                        value={openTime}
-                        onChange={(e) => setOpenTime(e.target.value)}
-                        className="h-9"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label htmlFor="close-time" className="text-xs">Fechamento</Label>
-                      <Input
-                        id="close-time"
-                        type="time"
-                        value={closeTime}
-                        onChange={(e) => setCloseTime(e.target.value)}
-                        className="h-9"
-                      />
-                    </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setBookingMode('time')}
+                      className={`flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors ${
+                        bookingMode === 'time'
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                          : 'border-border hover:border-primary/40'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5 text-xs font-semibold">
+                        <Clock className="h-3.5 w-3.5" />
+                        Por horário
+                      </span>
+                      <span className="text-[10px] leading-snug text-muted-foreground">
+                        Cliente escolhe data e horário na grade.
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBookingMode('day')}
+                      className={`flex flex-col items-start gap-1 rounded-lg border p-2.5 text-left transition-colors ${
+                        bookingMode === 'day'
+                          ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                          : 'border-border hover:border-primary/40'
+                      }`}
+                    >
+                      <span className="flex items-center gap-1.5 text-xs font-semibold">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        Por dia
+                      </span>
+                      <span className="text-[10px] leading-snug text-muted-foreground">
+                        Cliente escolhe só a data; o dia inteiro é reservado.
+                      </span>
+                    </button>
                   </div>
+
+                  {bookingMode === 'time' ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label htmlFor="open-time" className="text-xs">Abertura</Label>
+                        <Input
+                          id="open-time"
+                          type="time"
+                          value={openTime}
+                          onChange={(e) => setOpenTime(e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label htmlFor="close-time" className="text-xs">Fechamento</Label>
+                        <Input
+                          id="close-time"
+                          type="time"
+                          value={closeTime}
+                          onChange={(e) => setCloseTime(e.target.value)}
+                          className="h-9"
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="rounded-lg bg-primary/5 p-2.5 text-[11px] leading-snug text-muted-foreground">
+                      Sem grade de horários. As <strong className="text-foreground">vagas do serviço</strong> valem por dia
+                      (ex.: vagas = 1 → um cliente por dia).
+                    </p>
+                  )}
 
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Dias de Funcionamento</Label>
@@ -887,7 +944,9 @@ export const Onboarding = () => {
                             <Sparkles className="h-4 w-4 shrink-0" style={{ color: primaryColor }} />
                             <span className="min-w-0">
                               <span className="block truncate text-xs font-semibold">{serviceName.trim() || 'Seu primeiro serviço'}</span>
-                              <span className="mt-0.5 block text-[10px] text-muted-foreground">{serviceDuration || 60} min · {serviceCapacity || 1} {segment === 'gym' ? 'vagas' : 'vaga'}</span>
+                              <span className="mt-0.5 block text-[10px] text-muted-foreground">
+                                {bookingMode === 'day' ? 'Dia inteiro' : `${serviceDuration || 60} min`} · {serviceCapacity || 1} {bookingMode === 'day' ? (serviceCapacity === 1 ? 'vaga/dia' : 'vagas/dia') : (segment === 'gym' ? 'vagas' : 'vaga')}
+                              </span>
                             </span>
                           </span>
                           <span className="shrink-0 text-xs font-bold" style={{ color: primaryColor }}>
@@ -896,11 +955,17 @@ export const Onboarding = () => {
                         </div>
 
                         <div className="flex items-start gap-2 rounded-lg bg-muted/40 p-2.5">
-                          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: primaryColor }} />
+                          {bookingMode === 'day' ? (
+                            <CalendarDays className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: primaryColor }} />
+                          ) : (
+                            <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" style={{ color: primaryColor }} />
+                          )}
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold">Horário de atendimento</p>
+                            <p className="text-[10px] font-semibold">
+                              {bookingMode === 'day' ? 'Agendamento por dia' : 'Horário de atendimento'}
+                            </p>
                             <p className="mt-0.5 text-[10px] text-muted-foreground">
-                              {openTime} às {closeTime}
+                              {bookingMode === 'day' ? 'O cliente escolhe a data' : `${openTime} às ${closeTime}`}
                               {' · '}
                               {WEEKDAYS.filter((day) => openWeekdays.includes(day.id)).map((day) => day.label).join(', ') || 'selecione os dias'}
                             </p>
@@ -915,7 +980,7 @@ export const Onboarding = () => {
                             borderRadius: selectedSiteStyle.radius,
                           }}
                         >
-                          Ver horários disponíveis
+                          {bookingMode === 'day' ? 'Ver datas disponíveis' : 'Ver horários disponíveis'}
                           <ArrowRight className="ml-1.5 inline h-3.5 w-3.5" />
                         </span>
                       </div>

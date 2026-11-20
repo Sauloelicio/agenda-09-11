@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Calendar as CalendarIcon, 
+  CalendarDays,
   Sparkles, 
   Lock, 
   User, 
@@ -99,6 +100,7 @@ export const PublicBooking = () => {
     cancelAppointment,
     getAvailableSlots,
     getRemoteAvailableSlots,
+    getDayAvailability,
   } = useSaas();
 
   const localTenant = slug ? getTenantBySlug(slug) : undefined;
@@ -106,11 +108,14 @@ export const PublicBooking = () => {
   const [remotePageLoading, setRemotePageLoading] = useState(true);
   const [remotePageError, setRemotePageError] = useState(false);
   const [remoteSlots, setRemoteSlots] = useState<{ time: string; remainingCapacity: number }[]>([]);
+  const [dayRemaining, setDayRemaining] = useState<number | null>(null);
+  const [dayVersion, setDayVersion] = useState(0);
   const [remoteAppointments, setRemoteAppointments] = useState<Awaited<ReturnType<typeof findPublicAppointments>>>([]);
   const [lookupError, setLookupError] = useState<string | null>(null);
   const tenant = remoteWorkspace?.tenant ?? localTenant;
   const isRemoteTenant = remoteWorkspace !== null;
   const remoteCanBook = !isRemoteTenant || remoteWorkspace?.canBook === true;
+  const isDayMode = tenant?.settings.booking_mode === 'day';
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -202,6 +207,28 @@ export const PublicBooking = () => {
   }, [getRemoteAvailableSlots, isRemoteTenant, remoteCanBook, selectedDate, selectedProId, selectedService, tenant]);
 
   useEffect(() => {
+    if (!isDayMode || !tenant || !selectedDate || !selectedService || !remoteCanBook) {
+      setDayRemaining(null);
+      return;
+    }
+    let active = true;
+    getDayAvailability({
+      tenantId: tenant.id,
+      date: selectedDate,
+      serviceId: selectedService.id,
+      maxCapacity: selectedService.max_capacity,
+      settings: tenant.settings,
+      professionalId: selectedProId || undefined,
+      isRemote: isRemoteTenant,
+    }).then((remaining) => {
+      if (active) setDayRemaining(remaining);
+    }).catch(() => {
+      if (active) setDayRemaining(0);
+    });
+    return () => { active = false; };
+  }, [dayVersion, getDayAvailability, isDayMode, isRemoteTenant, remoteCanBook, selectedDate, selectedProId, selectedService, tenant]);
+
+  useEffect(() => {
     const cleanPhone = lookupPhone.replace(/\D/g, '');
     if (!isRemoteTenant || !tenant || cleanPhone.length < 8) {
       setRemoteAppointments([]);
@@ -282,7 +309,20 @@ export const PublicBooking = () => {
       toast.error('Selecione um serviço.');
       return;
     }
-    if (!selectedDate || !selectedTime) {
+    if (!selectedDate) {
+      toast.error('Escolha a data desejada.');
+      return;
+    }
+    if (isDayMode) {
+      if (dayRemaining === null) {
+        toast.error('Ainda estamos consultando a disponibilidade. Tente novamente em instantes.');
+        return;
+      }
+      if (dayRemaining <= 0) {
+        toast.error('Este dia está lotado. Escolha outra data.');
+        return;
+      }
+    } else if (!selectedTime) {
       toast.error('Escolha a data e o horário desejado.');
       return;
     }
@@ -297,32 +337,42 @@ export const PublicBooking = () => {
       clientName: clientName.trim(),
       clientPhone: clientPhone.trim(),
       date: dateStr,
-      time: selectedTime,
+      time: isDayMode ? '00:00' : selectedTime,
     }).catch((error: unknown) => {
       console.error('Appointment creation failed:', error);
       return { success: false, error: 'Não foi possível concluir o agendamento. Tente novamente.' };
     });
 
     if (!res.success) {
-      toast.error(res.error || 'Erro ao realizar agendamento.');
+      const isFull = isDayMode && /slot_taken/i.test(res.error || '');
+      toast.error(
+        isFull
+          ? 'Este dia acabou de ser reservado. Escolha outra data.'
+          : res.error || 'Erro ao realizar agendamento.'
+      );
       return;
     }
+
+    if (isDayMode) setDayVersion((version) => version + 1);
 
     // Build WhatsApp Message
     const formattedDate = format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR });
     const proText = selectedProId ? `\n👤 Atendente: ${tenantPros.find(p => p.id === selectedProId)?.name}` : '';
     
+    const scheduleLine = isDayMode
+      ? `📆 Data: ${formattedDate} (dia inteiro)`
+      : `📆 Data: ${formattedDate}\n⏰ Horário: ${selectedTime}`;
+
     const message = `✨ Agendamento Confirmado! ✨
 
 Olá, ${clientName}!
-Seu horário foi reservado com sucesso no *${tenant.name}*!
+Sua reserva foi confirmada no *${tenant.name}*!
 
-📆 Data: ${formattedDate}
-⏰ Horário: ${selectedTime}
+${scheduleLine}
 💛 Serviço: ${selectedService.name} (R$ ${selectedService.price.toFixed(2)})${proText}
 
 Qualquer dúvida ou alteração, é só chamar aqui mesmo.
-Te esperamos no horário marcado! 🤍`;
+Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
 
     const encodedMessage = encodeURIComponent(message);
     const cleanWhatsApp = tenant.phone.replace(/\D/g, '');
@@ -533,12 +583,16 @@ Te esperamos no horário marcado! 🤍`;
               </div>
             </div>
 
-            {/* 5. Available Slots */}
+            {/* 5. Available slots or day availability */}
             <div className="space-y-3">
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-primary" />
-                  Horários Disponíveis
+                  {isDayMode ? (
+                    <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Clock className="h-3.5 w-3.5 text-primary" />
+                  )}
+                  {isDayMode ? 'Disponibilidade do Dia' : 'Horários Disponíveis'}
                 </span>
                 {selectedDate && (
                   <span className="text-[11px] font-normal text-muted-foreground capitalize">
@@ -547,7 +601,26 @@ Te esperamos no horário marcado! 🤍`;
                 )}
               </span>
 
-              {availableSlots.length === 0 ? (
+              {isDayMode ? (
+                <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 text-center text-xs text-muted-foreground">
+                  {!selectedDate ? (
+                    'Escolha uma data no calendário para ver as vagas do dia.'
+                  ) : dayRemaining === null ? (
+                    'Consultando vagas...'
+                  ) : dayRemaining > 0 ? (
+                    <>
+                      <span className="font-bold text-primary">
+                        {dayRemaining} {dayRemaining === 1 ? 'vaga disponível' : 'vagas disponíveis'}
+                      </span>
+                      <span className="block text-[11px] mt-1">
+                        Dia inteiro · sem horário fixo
+                      </span>
+                    </>
+                  ) : (
+                    'Este dia está lotado. Por favor, escolha outra data.'
+                  )}
+                </div>
+              ) : availableSlots.length === 0 ? (
                 <div className="p-4 rounded-xl border border-dashed border-border text-center text-xs text-muted-foreground">
                   Nenhum horário disponível para esta data. Por favor, escolha outro dia.
                 </div>
@@ -580,24 +653,31 @@ Te esperamos no horário marcado! 🤍`;
             </div>
 
             {/* 6. Summary & Schedule Button */}
-            {selectedService && selectedDate && selectedTime && (
+            {selectedService && selectedDate && (isDayMode ? dayRemaining !== null : Boolean(selectedTime)) && (
               <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5 space-y-1.5 text-xs">
                 <div className="flex justify-between font-semibold text-foreground">
                   <span>Resumo do Agendamento:</span>
                   <span className="text-primary font-bold">R$ {selectedService.price.toFixed(2)}</span>
                 </div>
                 <p className="text-muted-foreground">
-                  📅 {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às {selectedTime}
+                  📅 {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
+                  {isDayMode ? ' (dia inteiro)' : ` às ${selectedTime}`}
                 </p>
                 <p className="text-muted-foreground">
-                  ✨ {selectedService.name} ({selectedService.duration_minutes} min)
+                  ✨ {selectedService.name} {isDayMode ? '· Dia inteiro' : `(${selectedService.duration_minutes} min)`}
                 </p>
               </div>
             )}
 
             <Button
               className="w-full h-12 text-base font-bold shadow-lg shadow-primary/25 gap-2"
-              disabled={!remoteCanBook || !clientName.trim() || !clientPhone.trim() || !selectedTime}
+              disabled={
+                !remoteCanBook ||
+                !clientName.trim() ||
+                !clientPhone.trim() ||
+                (!isDayMode && !selectedTime) ||
+                (isDayMode && dayRemaining !== null && dayRemaining <= 0)
+              }
               onClick={handleBooking}
             >
               <MessageSquare className="h-5 w-5" />
@@ -639,7 +719,9 @@ Te esperamos no horário marcado! 🤍`;
                         {myAppointments.map((a) => (
                           <div key={a.id} className="p-3 rounded-lg border border-border flex items-center justify-between text-xs">
                             <div>
-                              <p className="font-bold text-foreground">{a.date} às {a.time}</p>
+                              <p className="font-bold text-foreground">
+                                {a.date} {a.time === '00:00' ? '(dia inteiro)' : `às ${a.time}`}
+                              </p>
                               <p className="text-muted-foreground">{a.service_name}</p>
                             </div>
                             <Button

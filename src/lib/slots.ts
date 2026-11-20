@@ -6,6 +6,7 @@ export type BusinessSettings = {
   service_minutes: number;
   slot_interval_minutes: number;
   open_weekdays: number[];
+  booking_mode: 'time' | 'day';
 };
 
 export const DEFAULT_SETTINGS: BusinessSettings = {
@@ -16,6 +17,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   service_minutes: 60,
   slot_interval_minutes: 60,
   open_weekdays: [1, 2, 3, 4, 5, 6],
+  booking_mode: 'time',
 };
 
 export const toMin = (t: string) => {

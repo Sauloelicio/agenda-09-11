@@ -28,6 +28,7 @@ export const INITIAL_TENANTS: Tenant[] = [
       service_minutes: 60,
       slot_interval_minutes: 60,
       open_weekdays: [1, 2, 3, 4, 5, 6],
+      booking_mode: 'time',
     },
   },
   {
@@ -51,6 +52,7 @@ export const INITIAL_TENANTS: Tenant[] = [
       service_minutes: 40,
       slot_interval_minutes: 40,
       open_weekdays: [1, 2, 3, 4, 5, 6],
+      booking_mode: 'time',
     },
   },
   {
@@ -74,6 +76,7 @@ export const INITIAL_TENANTS: Tenant[] = [
       service_minutes: 60,
       slot_interval_minutes: 60,
       open_weekdays: [1, 2, 3, 4, 5, 6],
+      booking_mode: 'time',
     },
   },
 ];
