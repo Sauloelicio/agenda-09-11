@@ -85,7 +85,7 @@ export interface Tenant {
   segment: SegmentType;
   phone: string; // WhatsApp para notificações
   email: string;
-  logo_url?: string;
+  logo_url?: string | null;
   primary_color?: string;
   site_style?: SiteStyle;
   bio?: string;

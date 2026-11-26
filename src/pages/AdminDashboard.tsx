@@ -36,6 +36,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BillingBanner } from '@/components/BillingBanner';
+import { TenantLogoField } from '@/components/TenantLogoField';
+import { deleteTenantLogoByUrl, uploadTenantLogo } from '@/lib/tenant-logo';
 
 const DAYS = [
   { id: 0, label: 'Dom' },
@@ -96,6 +98,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
   const [bizName, setBizName] = useState(currentTenant?.name || '');
   const [bizPhone, setBizPhone] = useState(currentTenant?.phone || '');
   const [bizBio, setBizBio] = useState(currentTenant?.bio || '');
+  const [isSavingLogo, setIsSavingLogo] = useState(false);
 
   useEffect(() => {
     if (!currentTenant) return;
@@ -213,6 +216,42 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     } catch (error) {
       console.error('Unable to save business information:', error);
       toast.error('Não foi possível salvar as informações. Verifique o período de acesso e tente novamente.');
+    }
+  };
+
+  const handleSelectLogo = async (file: File) => {
+    if (demoMode) return;
+    setIsSavingLogo(true);
+    let uploadedUrl: string | null = null;
+    try {
+      uploadedUrl = await uploadTenantLogo(currentTenant.id, file);
+      await updateTenantInfo(currentTenant.id, { logo_url: uploadedUrl });
+      if (currentTenant.logo_url && currentTenant.logo_url !== uploadedUrl) {
+        await deleteTenantLogoByUrl(currentTenant.logo_url);
+      }
+      toast.success('Logo atualizada!');
+    } catch (error) {
+      console.error('Unable to update tenant logo:', error);
+      if (uploadedUrl) await deleteTenantLogoByUrl(uploadedUrl);
+      toast.error('Não foi possível enviar a logo. Verifique o formato e o período de acesso.');
+    } finally {
+      setIsSavingLogo(false);
+    }
+  };
+
+  const handleRemoveLogo = async () => {
+    if (demoMode || !currentTenant.logo_url) return;
+    setIsSavingLogo(true);
+    const previousUrl = currentTenant.logo_url;
+    try {
+      await updateTenantInfo(currentTenant.id, { logo_url: null });
+      await deleteTenantLogoByUrl(previousUrl);
+      toast.success('Logo removida.');
+    } catch (error) {
+      console.error('Unable to remove tenant logo:', error);
+      toast.error('Não foi possível remover a logo. Tente novamente.');
+    } finally {
+      setIsSavingLogo(false);
     }
   };
 
@@ -936,7 +975,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Configurações do Negócio</CardTitle>
                 <CardDescription className="text-xs">
-                  Altere nome exibido, WhatsApp de contato e bio do seu negócio.
+                  Altere nome exibido, WhatsApp de contato, bio e logo do seu negócio.
                 </CardDescription>
               </CardHeader>
 
@@ -965,6 +1004,16 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                     placeholder="Ex: Cortes clássicos, manicure de alto padrão, etc."
                   />
                 </div>
+
+                {!demoMode && (
+                  <TenantLogoField
+                    previewUrl={currentTenant.logo_url ?? null}
+                    onSelect={handleSelectLogo}
+                    onRemove={handleRemoveLogo}
+                    disabled={isSavingLogo}
+                    busy={isSavingLogo}
+                  />
+                )}
 
                 <Button onClick={handleSaveCompanyInfo} className="font-semibold">
                   Salvar Informações

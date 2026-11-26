@@ -23,7 +23,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSaas } from '@/contexts/SaasContext';
 import { supabase } from '@/integrations/supabase/client';
+import { TenantLogoField } from '@/components/TenantLogoField';
+import { clearLogoDraft, readLogoDraft, saveLogoDraft } from '@/lib/logo-draft';
+import { deleteTenantLogoByUrl, uploadTenantLogo } from '@/lib/tenant-logo';
 import { SegmentType, SiteStyle } from '@/types/saas';
 import { toast } from 'sonner';
 
@@ -108,9 +112,11 @@ export const Onboarding = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, reloadOwnedTenants } = useAuth();
+  const { updateTenantInfo } = useSaas();
   const isDemoMode = new URLSearchParams(location.search).get('demo') === '1';
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [isCreating, setIsCreating] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [demoComplete, setDemoComplete] = useState(false);
   const draftCompletionStarted = useRef(false);
 
@@ -121,6 +127,11 @@ export const Onboarding = () => {
   const [segment, setSegment] = useState<SegmentType>('salon');
   const [primaryColor, setPrimaryColor] = useState(COLOR_PALETTES[2].color);
   const [siteStyle, setSiteStyle] = useState<SiteStyle>('warm');
+
+  // Logo (pré-cadastro)
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoPreviewUrlRef = useRef<string | null>(null);
   const selectedPalette = COLOR_PALETTES.find((palette) => palette.color === primaryColor) ?? COLOR_PALETTES[0];
   const selectedSiteStyle = SITE_STYLES.find((style) => style.id === siteStyle) ?? SITE_STYLES[1];
   const progressPercent = Math.round((step / 4) * 100);
@@ -134,6 +145,49 @@ export const Onboarding = () => {
     }, 0);
     return luminance > 0.4 ? '#211e1b' : '#ffffff';
   };
+
+  const replaceLogoPreview = useCallback((file: File) => {
+    if (logoPreviewUrlRef.current) URL.revokeObjectURL(logoPreviewUrlRef.current);
+    const previewUrl = URL.createObjectURL(file);
+    logoPreviewUrlRef.current = previewUrl;
+    setLogoPreview(previewUrl);
+  }, []);
+
+  const handleSelectLogo = useCallback((file: File) => {
+    setLogoFile(file);
+    replaceLogoPreview(file);
+    if (!isDemoMode) void saveLogoDraft(file);
+  }, [isDemoMode, replaceLogoPreview]);
+
+  const handleRemoveLogo = useCallback(() => {
+    setLogoFile(null);
+    if (logoPreviewUrlRef.current) {
+      URL.revokeObjectURL(logoPreviewUrlRef.current);
+      logoPreviewUrlRef.current = null;
+    }
+    setLogoPreview(null);
+    if (!isDemoMode) void clearLogoDraft();
+  }, [isDemoMode]);
+
+  // Recupera a logo escolhida antes do cadastro/login.
+  useEffect(() => {
+    if (isDemoMode) return;
+    let cancelled = false;
+
+    void readLogoDraft().then((file) => {
+      if (!file || cancelled || logoPreviewUrlRef.current) return;
+      setLogoFile(file);
+      replaceLogoPreview(file);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDemoMode, replaceLogoPreview]);
+
+  useEffect(() => () => {
+    if (logoPreviewUrlRef.current) URL.revokeObjectURL(logoPreviewUrlRef.current);
+  }, []);
 
   // Business Hours
   const [bookingMode, setBookingMode] = useState<'time' | 'day'>('time');
@@ -209,7 +263,7 @@ export const Onboarding = () => {
   }) => {
     setIsCreating(true);
     try {
-      const { error } = await supabase.rpc('create_tenant_with_owner', {
+      const { data: createdTenantId, error } = await supabase.rpc('create_tenant_with_owner', {
         _name: data.name,
         _phone: data.phone,
         _slug: data.slug,
@@ -236,9 +290,34 @@ export const Onboarding = () => {
         return;
       }
 
+      let logoUploadFailed = false;
+      if (createdTenantId) {
+        const logo = logoFile ?? await readLogoDraft();
+        if (logo) {
+          setIsUploadingLogo(true);
+          let uploadedUrl: string | null = null;
+          try {
+            uploadedUrl = await uploadTenantLogo(createdTenantId, logo);
+            await updateTenantInfo(createdTenantId, { logo_url: uploadedUrl });
+          } catch (logoError) {
+            console.error('Tenant logo upload failed:', logoError);
+            if (uploadedUrl) await deleteTenantLogoByUrl(uploadedUrl);
+            logoUploadFailed = true;
+          } finally {
+            setIsUploadingLogo(false);
+          }
+        }
+      }
+
+      await clearLogoDraft();
       sessionStorage.removeItem('onboarding_draft_v1');
       await reloadOwnedTenants();
-      toast.success('Agenda criada! Escolha como quer continuar com o teste de cinco dias.');
+
+      if (logoUploadFailed) {
+        toast.warning('Agenda criada! A logo não pôde ser enviada agora — você pode cadastrá-la depois no painel.');
+      } else {
+        toast.success('Agenda criada! Escolha como quer continuar com o teste de cinco dias.');
+      }
       navigate('/planos?welcome=1', { replace: true });
     } catch (error) {
       console.error('Tenant creation failed:', error);
@@ -246,7 +325,7 @@ export const Onboarding = () => {
     } finally {
       setIsCreating(false);
     }
-  }, [navigate, reloadOwnedTenants]);
+  }, [logoFile, navigate, reloadOwnedTenants, updateTenantInfo]);
 
   useEffect(() => {
     if (isDemoMode
@@ -592,7 +671,17 @@ export const Onboarding = () => {
                   </div>
                 </section>
 
-                <section className="order-3 space-y-3 sm:order-2">
+                <section className="order-2">
+                  <TenantLogoField
+                    previewUrl={logoPreview}
+                    onSelect={handleSelectLogo}
+                    onRemove={handleRemoveLogo}
+                    disabled={isCreating || isUploadingLogo}
+                    busy={isUploadingLogo}
+                  />
+                </section>
+
+                <section className="order-3 space-y-3">
                   <div>
                     <Label className="text-sm font-semibold">Qual estilo combina com você?</Label>
                     <p className="text-xs text-muted-foreground mt-1">Isso define o formato dos elementos e o clima da página.</p>
@@ -622,7 +711,7 @@ export const Onboarding = () => {
                   </div>
                 </section>
 
-                <section className="order-2 overflow-hidden rounded-2xl border border-border bg-muted/20 sm:order-3">
+                <section className="order-4 overflow-hidden rounded-2xl border border-border bg-muted/20">
                   <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5 text-xs font-semibold text-muted-foreground">
                     <span className="flex items-center gap-2">
                     <Eye className="h-3.5 w-3.5" />
@@ -636,14 +725,18 @@ export const Onboarding = () => {
                     <div className="mx-auto max-w-sm overflow-hidden border border-black/10 bg-background shadow-sm" style={{ borderRadius: selectedSiteStyle.radius }}>
                       <div className="flex items-center gap-3 border-b border-border/70 px-3 py-3">
                         <span
-                          className="flex h-9 w-9 shrink-0 items-center justify-center text-sm font-bold"
+                          className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden text-sm font-bold"
                           style={{
-                            backgroundColor: `${primaryColor}18`,
+                            backgroundColor: logoPreview ? 'transparent' : `${primaryColor}18`,
                             color: primaryColor,
                             borderRadius: selectedSiteStyle.radius,
                           }}
                         >
-                          {(name.trim()[0] || 'N').toUpperCase()}
+                          {logoPreview ? (
+                            <img src={logoPreview} alt="" className="h-full w-full object-contain" />
+                          ) : (
+                            (name.trim()[0] || 'N').toUpperCase()
+                          )}
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-bold">{name.trim() || 'Nome do seu negócio'}</span>
@@ -715,7 +808,7 @@ export const Onboarding = () => {
                   </div>
                 </section>
 
-                <div className="order-4 flex items-center gap-3 pt-1">
+                <div className="order-5 flex items-center gap-3 pt-1">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Voltar

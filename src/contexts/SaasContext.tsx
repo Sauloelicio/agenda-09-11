@@ -397,6 +397,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       segment: segment as SegmentType,
       phone: requiredString(tenantRecord, 'phone'),
       email: '',
+      logo_url: typeof tenantRecord.logo_url === 'string' ? tenantRecord.logo_url : undefined,
       primary_color: typeof tenantRecord.primary_color === 'string' ? tenantRecord.primary_color : undefined,
       site_style: siteStyle as SiteStyle,
       bio: typeof tenantRecord.bio === 'string' ? tenantRecord.bio : undefined,

@@ -107,6 +107,7 @@ export const PublicBooking = () => {
   const [remoteWorkspace, setRemoteWorkspace] = useState<Awaited<ReturnType<typeof loadPublicTenantPage>>>(null);
   const [remotePageLoading, setRemotePageLoading] = useState(true);
   const [remotePageError, setRemotePageError] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const [remoteSlots, setRemoteSlots] = useState<{ time: string; remainingCapacity: number }[]>([]);
   const [dayRemaining, setDayRemaining] = useState<number | null>(null);
   const [dayVersion, setDayVersion] = useState(0);
@@ -116,6 +117,11 @@ export const PublicBooking = () => {
   const isRemoteTenant = remoteWorkspace !== null;
   const remoteCanBook = !isRemoteTenant || remoteWorkspace?.canBook === true;
   const isDayMode = tenant?.settings.booking_mode === 'day';
+  const hasTenantLogo = Boolean(tenant?.logo_url) && !logoFailed;
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [tenant?.logo_url]);
 
   // Form State
   const [clientName, setClientName] = useState('');
@@ -417,8 +423,22 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
           </Link>
 
           <div className="flex flex-col items-center text-center space-y-2">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xl shadow-inner">
-              {tenant.segment === 'barbershop' ? (
+            <div
+              className={`h-16 w-16 rounded-2xl flex items-center justify-center font-bold text-xl shadow-inner overflow-hidden ${
+                hasTenantLogo
+                  ? 'border border-border bg-background'
+                  : 'bg-primary/10 text-primary'
+              }`}
+            >
+              {hasTenantLogo ? (
+                <img
+                  src={tenant.logo_url ?? ''}
+                  alt={`Logo de ${tenant.name}`}
+                  className="h-full w-full object-contain p-1.5"
+                  loading="eager"
+                  onError={() => setLogoFailed(true)}
+                />
+              ) : tenant.segment === 'barbershop' ? (
                 <Scissors className="h-7 w-7" />
               ) : tenant.segment === 'gym' ? (
                 <Dumbbell className="h-7 w-7" />

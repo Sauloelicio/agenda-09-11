@@ -253,6 +253,18 @@ Depois do primeiro deploy de produção:
    **Settings → Deployment Protection → Vercel Authentication** (ou faça
    "Promote to Production" no deploy desejado).
 
+### Logo do estabelecimento (Storage)
+
+A logo é enviada para o bucket público `tenant-logos`, dentro da pasta
+`{tenant_id}/`, e a URL fica salva em `tenants.logo_url`. A migration
+`20261125120000_tenant_logo.sql` cria o bucket, as policies de escrita
+(restritas aos membros do tenant) e inclui `logo_url` no retorno de
+`get_public_tenant_page`.
+
+Formatos aceitos: **PNG, JPG e WebP**, até **2 MB**. A página pública exibe a
+logo centralizada e volta ao ícone do segmento quando não houver imagem ou se
+o arquivo falhar ao carregar.
+
 ### Estrutura do banco
 
 | Grupo | Tabelas |
