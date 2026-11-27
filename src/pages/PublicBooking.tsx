@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Calendar as CalendarIcon, 
@@ -141,6 +141,7 @@ export const PublicBooking = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [isBooked, setIsBooked] = useState(false);
+  const bookedTimeoutRef = useRef<number | null>(null);
 
   // My Appointments Lookup State
   const [lookupPhone, setLookupPhone] = useState('');
@@ -312,6 +313,14 @@ export const PublicBooking = () => {
       })
     : [];
 
+  useEffect(() => {
+    return () => {
+      if (bookedTimeoutRef.current !== null) {
+        window.clearTimeout(bookedTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleBooking = async () => {
     if (isBooked) return;
     if (!remoteCanBook) {
@@ -398,8 +407,16 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
     setIsBooked(true);
     toast.success('Agendamento realizado com sucesso!');
 
+    if (bookedTimeoutRef.current !== null) {
+      window.clearTimeout(bookedTimeoutRef.current);
+    }
+    bookedTimeoutRef.current = window.setTimeout(() => {
+      setIsBooked(false);
+      bookedTimeoutRef.current = null;
+    }, 10000);
+
     // Redirect to WhatsApp
-    setTimeout(() => {
+    window.setTimeout(() => {
       window.open(whatsappUrl, '_blank');
     }, 1400);
   };
