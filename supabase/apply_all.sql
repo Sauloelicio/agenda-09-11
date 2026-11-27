@@ -3012,3 +3012,32 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION public.get_public_tenant_page(text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.get_public_tenant_page(text) TO anon, authenticated;
+
+-- ==============================================================================
+-- FONTE: supabase/migrations/20261127120000_delete_service_cascade.sql
+-- ==============================================================================
+-- Exclusão de serviços com agendamentos vinculados. Antes a FK usava
+-- ON DELETE RESTRICT; agora o serviço e seus agendamentos são removidos juntos.
+-- Idempotente.
+-- ==============================================================================
+
+DO $$
+DECLARE
+  fk record;
+BEGIN
+  FOR fk IN
+    SELECT conname
+    FROM pg_constraint
+    WHERE conrelid = 'public.tenant_appointments'::regclass
+      AND confrelid = 'public.tenant_services'::regclass
+      AND contype = 'f'
+  LOOP
+    EXECUTE format('ALTER TABLE public.tenant_appointments DROP CONSTRAINT %I', fk.conname);
+  END LOOP;
+END $$;
+
+ALTER TABLE public.tenant_appointments
+  ADD CONSTRAINT tenant_appointments_service_fk
+  FOREIGN KEY (tenant_id, service_id)
+  REFERENCES public.tenant_services(tenant_id, id)
+  ON DELETE CASCADE;

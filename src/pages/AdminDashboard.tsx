@@ -55,6 +55,75 @@ const DAYS = [
   { id: 6, label: 'Sáb' },
 ];
 
+const ServiceDurationField = ({
+  serviceId,
+  minutes,
+  onSave,
+}: {
+  serviceId: string;
+  minutes: number;
+  onSave: (serviceId: string, minutes: number) => Promise<void>;
+}) => {
+  const [draft, setDraft] = useState(String(minutes));
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDraft(String(minutes));
+  }, [minutes]);
+
+  const save = async () => {
+    const parsed = Number(draft);
+    if (!Number.isFinite(parsed) || parsed < 5 || parsed > 720) {
+      toast.error('A duração deve estar entre 5 e 720 minutos.');
+      return;
+    }
+    if (parsed === minutes) return;
+
+    setSaving(true);
+    try {
+      await onSave(serviceId, parsed);
+      toast.success('Duração atualizada! A grade de horários foi recalculada.');
+    } catch (error) {
+      console.error('Unable to update service duration:', error);
+      setDraft(String(minutes));
+      toast.error('Não foi possível atualizar a duração. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 mt-1">
+      <Label htmlFor={`duration-${serviceId}`} className="text-[11px] font-normal text-muted-foreground">
+        Duração (min)
+      </Label>
+      <Input
+        id={`duration-${serviceId}`}
+        type="number"
+        min={5}
+        max={720}
+        step={5}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') void save();
+        }}
+        className="h-7 w-[76px] text-xs bg-background"
+      />
+      <Button
+        type="button"
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2 text-[11px]"
+        onClick={() => void save()}
+        disabled={saving || Number(draft) === minutes}
+      >
+        {saving ? 'Salvando...' : 'Salvar'}
+      </Button>
+    </div>
+  );
+};
+
 export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,6 +137,7 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     appointments,
     addService,
     deleteService,
+    updateServiceDuration,
     addProfessional,
     deleteProfessional,
     updateTenantSettings,
@@ -731,8 +801,13 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                           )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Duração: {srv.duration_minutes} min · Preço: R$ {srv.price.toFixed(2)}
+                          Preço: R$ {srv.price.toFixed(2)}
                         </p>
+                        <ServiceDurationField
+                          serviceId={srv.id}
+                          minutes={srv.duration_minutes}
+                          onSave={updateServiceDuration}
+                        />
                       </div>
 
                       <Button 
@@ -740,13 +815,23 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
                         variant="ghost" 
                         className="text-destructive h-8 w-8 p-0"
                         onClick={async () => {
-                          if (confirm(`Excluir o serviço "${srv.name}"?`)) {
+                          const linked = appointments.filter((a) => a.service_id === srv.id).length;
+                          const linkedText = linked === 1
+                            ? '1 agendamento vinculado também será excluído'
+                            : `${linked} agendamentos vinculados também serão excluídos`;
+                          const message = linked > 0
+                            ? `Excluir o serviço "${srv.name}"? ${linkedText}.`
+                            : `Excluir o serviço "${srv.name}"?`;
+
+                          if (confirm(message)) {
                             try {
                               await deleteService(srv.id);
-                              toast.success('Serviço removido');
+                              toast.success(linked > 0
+                                ? `Serviço e ${linked} agendamento${linked > 1 ? 's' : ''} removidos`
+                                : 'Serviço removido');
                             } catch (error) {
                               console.error('Unable to delete service:', error);
-                              toast.error('Não foi possível remover o serviço. Ele pode estar vinculado a agendamentos.');
+                              toast.error('Não foi possível remover o serviço. Tente novamente.');
                             }
                           }
                         }}

@@ -62,6 +62,7 @@ interface SaasContextType {
   
   addService: (service: Omit<Service, 'id' | 'tenant_id' | 'sort_order'>) => Promise<Service>;
   updateService: (serviceId: string, data: Partial<Service>) => Promise<void>;
+  updateServiceDuration: (serviceId: string, minutes: number) => Promise<void>;
   deleteService: (serviceId: string) => Promise<void>;
   
   addProfessional: (pro: Omit<Professional, 'id' | 'tenant_id'>) => Promise<Professional>;
@@ -590,13 +591,48 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  // Replica o comportamento do campo "Duração (min)" do passo 4 do onboarding:
+  // a mesma duração vale para o serviço e para a grade de horários da conta.
+  const updateServiceDuration = async (serviceId: string, minutes: number) => {
+    if (!Number.isFinite(minutes) || minutes < 5 || minutes > 720) {
+      throw new Error('A duração deve estar entre 5 e 720 minutos.');
+    }
+
+    const service = allServices.find((item) => item.id === serviceId);
+    if (!service) throw new Error('Serviço não encontrado.');
+
+    const tenant = tenants.find((item) => item.id === service.tenant_id);
+    if (!tenant) throw new Error('Estabelecimento não encontrado.');
+
+    await updateService(serviceId, { duration_minutes: minutes });
+    await updateTenantSettings(tenant.id, {
+      ...tenant.settings,
+      service_minutes: minutes,
+      slot_interval_minutes: minutes,
+    });
+  };
+
   const deleteService = async (serviceId: string) => {
     const existing = allServices.find((service) => service.id === serviceId);
-    if (existing && isRemoteTenant(existing.tenant_id)) {
-      const { error } = await supabase.from('tenant_services').delete().eq('id', serviceId).select('id').single();
+    if (!existing) return;
+
+    if (isRemoteTenant(existing.tenant_id)) {
+      // A FK de tenant_appointments usa ON DELETE CASCADE: os agendamentos
+      // vinculados são removidos pelo banco junto com o serviço.
+      const { error } = await supabase
+        .from('tenant_services')
+        .delete()
+        .eq('id', serviceId)
+        .eq('tenant_id', existing.tenant_id)
+        .select('id')
+        .single();
       if (error) throw new Error(error.message);
     }
+
     setAllServices((prev) => prev.filter((s) => s.id !== serviceId));
+    setAllAppointments((prev) => prev.filter(
+      (a) => a.tenant_id !== existing.tenant_id || a.service_id !== serviceId
+    ));
   };
 
   const addProfessional = async (pro: Omit<Professional, 'id' | 'tenant_id'>): Promise<Professional> => {
@@ -981,6 +1017,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateTenantInfo,
         addService,
         updateService,
+        updateServiceDuration,
         deleteService,
         addProfessional,
         updateProfessional,
