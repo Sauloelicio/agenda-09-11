@@ -21,6 +21,51 @@ export const validateTenantLogo = (file: File): string | null => {
   return null;
 };
 
+export type LogoErrorStage = 'upload' | 'database' | 'cleanup';
+
+interface LogoErrorDetails {
+  message?: string;
+  status?: number;
+  statusCode?: number;
+  code?: string;
+}
+
+const FRIENDLY_LOGO_ERRORS: Array<[RegExp, string]> = [
+  [/bucket not found/i, 'O armazenamento de logos não está configurado. Tente novamente mais tarde.'],
+  [/row-level security|rls|permission|not authorized/i, 'Você não tem permissão para enviar a logo deste estabelecimento.'],
+  [/exceeded.*size|maximum allowed size|entity too large/i, 'A imagem ultrapassa o limite de 2 MB.'],
+  [/mime|unsupported media|invalid format/i, 'Formato inválido. Use PNG, JPG ou WebP.'],
+  [/jwt|token|unauthorized|expired/i, 'Sua sessão expirou. Entre novamente e tente outra vez.'],
+];
+
+export const getLogoErrorMessage = (error: unknown): string => {
+  const raw = error instanceof Error
+    ? error.message
+    : typeof error === 'string'
+      ? error
+      : '';
+  const friendly = FRIENDLY_LOGO_ERRORS.find(([pattern]) => pattern.test(raw));
+  return friendly ? friendly[1] : raw || 'Não foi possível concluir a operação. Tente novamente.';
+};
+
+export const reportLogoFailure = (
+  stage: LogoErrorStage,
+  error: unknown,
+  context: { tenantId: string; file?: File },
+): void => {
+  const details = (error ?? {}) as LogoErrorDetails;
+  console.error('[tenant-logo] falha', {
+    stage,
+    tenantId: context.tenantId,
+    fileSize: context.file?.size,
+    mimeType: context.file?.type,
+    message: details.message ?? getLogoErrorMessage(error),
+    status: details.status ?? details.statusCode,
+    code: details.code,
+    at: new Date().toISOString(),
+  });
+};
+
 export const tenantLogoPathFromUrl = (logoUrl: string | null | undefined): string | null => {
   if (!logoUrl) return null;
   const marker = `/object/public/${TENANT_LOGO_BUCKET}/`;

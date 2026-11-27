@@ -29,6 +29,7 @@ import { SiteStyle } from '@/types/saas';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const hexToHsl = (hex: string) => {
   const normalized = hex.replace('#', '');
@@ -108,6 +109,7 @@ export const PublicBooking = () => {
   const [remotePageLoading, setRemotePageLoading] = useState(true);
   const [remotePageError, setRemotePageError] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [logoIsWide, setLogoIsWide] = useState(false);
   const [remoteSlots, setRemoteSlots] = useState<{ time: string; remainingCapacity: number }[]>([]);
   const [dayRemaining, setDayRemaining] = useState<number | null>(null);
   const [dayVersion, setDayVersion] = useState(0);
@@ -119,8 +121,16 @@ export const PublicBooking = () => {
   const isDayMode = tenant?.settings.booking_mode === 'day';
   const hasTenantLogo = Boolean(tenant?.logo_url) && !logoFailed;
 
+  let logoBoxClassName = 'h-10 w-10 bg-primary/10 text-primary sm:h-12 sm:w-12';
+  if (hasTenantLogo) {
+    logoBoxClassName = logoIsWide
+      ? 'h-20 w-32 border border-border bg-background sm:h-24 sm:w-44'
+      : 'h-20 w-20 border border-border bg-background sm:h-24 sm:w-24 lg:h-28 lg:w-28';
+  }
+
   useEffect(() => {
     setLogoFailed(false);
+    setLogoIsWide(false);
   }, [tenant?.logo_url]);
 
   // Form State
@@ -424,26 +434,31 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
 
           <div className="flex flex-col items-center text-center space-y-2">
             <div
-              className={`h-16 w-16 rounded-2xl flex items-center justify-center font-bold text-xl shadow-inner overflow-hidden ${
-                hasTenantLogo
-                  ? 'border border-border bg-background'
-                  : 'bg-primary/10 text-primary'
-              }`}
+              className={cn(
+                'flex items-center justify-center rounded-2xl font-bold shadow-inner overflow-hidden',
+                logoBoxClassName,
+              )}
             >
               {hasTenantLogo ? (
                 <img
                   src={tenant.logo_url ?? ''}
                   alt={`Logo de ${tenant.name}`}
-                  className="h-full w-full object-contain p-1.5"
+                  className="h-full w-full object-contain p-1 sm:p-1.5"
                   loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
+                  onLoad={(event) => {
+                    const image = event.currentTarget;
+                    setLogoIsWide(image.naturalWidth / image.naturalHeight > 1.4);
+                  }}
                   onError={() => setLogoFailed(true)}
                 />
               ) : tenant.segment === 'barbershop' ? (
-                <Scissors className="h-7 w-7" />
+                <Scissors className="h-7 w-7 sm:h-8 sm:w-8" />
               ) : tenant.segment === 'gym' ? (
-                <Dumbbell className="h-7 w-7" />
+                <Dumbbell className="h-7 w-7 sm:h-8 sm:w-8" />
               ) : (
-                <Sparkles className="h-7 w-7" />
+                <Sparkles className="h-7 w-7 sm:h-8 sm:w-8" />
               )}
             </div>
 

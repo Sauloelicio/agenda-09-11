@@ -46,11 +46,16 @@ export const TenantLogoField = ({
     <div className="space-y-2">
       <Label className="text-sm font-semibold">Logo do estabelecimento</Label>
       <div className="flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 p-3">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background">
+        <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-background sm:h-28 sm:w-28">
           {previewUrl ? (
-            <img src={previewUrl} alt="Prévia da logo" className="h-full w-full object-contain p-1" />
+            <img
+              src={previewUrl}
+              alt="Prévia da logo"
+              className="h-full w-full object-contain p-1 sm:p-1.5"
+              decoding="async"
+            />
           ) : (
-            <ImagePlus className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+            <ImagePlus className="h-7 w-7 text-muted-foreground sm:h-8 sm:w-8" aria-hidden="true" />
           )}
         </div>
 
@@ -87,7 +92,7 @@ export const TenantLogoField = ({
           </div>
 
           <p className="text-[11px] leading-snug text-muted-foreground">
-            {description ?? `PNG, JPG ou WebP · até ${TENANT_LOGO_MAX_LABEL} · recomendado 512×512 px com fundo transparente.`}
+            {description ?? `PNG, JPG ou WebP · até ${TENANT_LOGO_MAX_LABEL} · recomendado 512×512 px ou maior, com fundo transparente. Logos horizontais também são aceitas.`}
           </p>
         </div>
       </div>

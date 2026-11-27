@@ -27,7 +27,13 @@ import { useSaas } from '@/contexts/SaasContext';
 import { supabase } from '@/integrations/supabase/client';
 import { TenantLogoField } from '@/components/TenantLogoField';
 import { clearLogoDraft, readLogoDraft, saveLogoDraft } from '@/lib/logo-draft';
-import { deleteTenantLogoByUrl, uploadTenantLogo } from '@/lib/tenant-logo';
+import {
+  deleteTenantLogoByUrl,
+  getLogoErrorMessage,
+  reportLogoFailure,
+  uploadTenantLogo,
+  type LogoErrorStage,
+} from '@/lib/tenant-logo';
 import { SegmentType, SiteStyle } from '@/types/saas';
 import { toast } from 'sonner';
 
@@ -290,19 +296,21 @@ export const Onboarding = () => {
         return;
       }
 
-      let logoUploadFailed = false;
+      let logoErrorMessage = '';
       if (createdTenantId) {
         const logo = logoFile ?? await readLogoDraft();
         if (logo) {
           setIsUploadingLogo(true);
           let uploadedUrl: string | null = null;
+          let stage: LogoErrorStage = 'upload';
           try {
             uploadedUrl = await uploadTenantLogo(createdTenantId, logo);
+            stage = 'database';
             await updateTenantInfo(createdTenantId, { logo_url: uploadedUrl });
           } catch (logoError) {
-            console.error('Tenant logo upload failed:', logoError);
+            reportLogoFailure(stage, logoError, { tenantId: createdTenantId, file: logo });
             if (uploadedUrl) await deleteTenantLogoByUrl(uploadedUrl);
-            logoUploadFailed = true;
+            logoErrorMessage = getLogoErrorMessage(logoError);
           } finally {
             setIsUploadingLogo(false);
           }
@@ -313,8 +321,8 @@ export const Onboarding = () => {
       sessionStorage.removeItem('onboarding_draft_v1');
       await reloadOwnedTenants();
 
-      if (logoUploadFailed) {
-        toast.warning('Agenda criada! A logo não pôde ser enviada agora — você pode cadastrá-la depois no painel.');
+      if (logoErrorMessage) {
+        toast.warning(`Agenda criada! A logo não pôde ser enviada: ${logoErrorMessage} Você pode cadastrá-la depois no painel.`);
       } else {
         toast.success('Agenda criada! Escolha como quer continuar com o teste de cinco dias.');
       }

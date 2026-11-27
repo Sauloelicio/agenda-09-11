@@ -37,7 +37,13 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { BillingBanner } from '@/components/BillingBanner';
 import { TenantLogoField } from '@/components/TenantLogoField';
-import { deleteTenantLogoByUrl, uploadTenantLogo } from '@/lib/tenant-logo';
+import {
+  deleteTenantLogoByUrl,
+  getLogoErrorMessage,
+  reportLogoFailure,
+  uploadTenantLogo,
+  type LogoErrorStage,
+} from '@/lib/tenant-logo';
 
 const DAYS = [
   { id: 0, label: 'Dom' },
@@ -113,6 +119,14 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     setBizBio(currentTenant.bio || '');
   }, [currentTenant]);
 
+  // Retorno do checkout da Abacate Pay: o webhook confirma a assinatura em instantes.
+  useEffect(() => {
+    if (demoMode || searchParams.get('billing') !== 'return') return;
+    toast.success('Pagamento enviado! Estamos confirmando sua assinatura.');
+    searchParams.delete('billing');
+    setSearchParams(searchParams, { replace: true });
+  }, [demoMode, searchParams, setSearchParams]);
+
   if (!currentTenant) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -132,14 +146,6 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     0,
     Math.ceil((Date.parse(currentTenant.trial_ends_at) - Date.now()) / (24 * 60 * 60 * 1000))
   );
-
-  // Retorno do checkout da Abacate Pay: o webhook confirma a assinatura em instantes.
-  useEffect(() => {
-    if (demoMode || searchParams.get('billing') !== 'return') return;
-    toast.success('Pagamento enviado! Estamos confirmando sua assinatura.');
-    searchParams.delete('billing');
-    setSearchParams(searchParams, { replace: true });
-  }, [demoMode, searchParams, setSearchParams]);
 
   const copyLink = () => {
     navigator.clipboard.writeText(clientBookingUrl);
@@ -223,17 +229,20 @@ export const AdminDashboard = ({ demoMode = false }: { demoMode?: boolean }) => 
     if (demoMode) return;
     setIsSavingLogo(true);
     let uploadedUrl: string | null = null;
+    let stage: LogoErrorStage = 'upload';
     try {
       uploadedUrl = await uploadTenantLogo(currentTenant.id, file);
+      stage = 'database';
       await updateTenantInfo(currentTenant.id, { logo_url: uploadedUrl });
+      stage = 'cleanup';
       if (currentTenant.logo_url && currentTenant.logo_url !== uploadedUrl) {
         await deleteTenantLogoByUrl(currentTenant.logo_url);
       }
       toast.success('Logo atualizada!');
     } catch (error) {
-      console.error('Unable to update tenant logo:', error);
+      reportLogoFailure(stage, error, { tenantId: currentTenant.id, file });
       if (uploadedUrl) await deleteTenantLogoByUrl(uploadedUrl);
-      toast.error('Não foi possível enviar a logo. Verifique o formato e o período de acesso.');
+      toast.error(`Não foi possível enviar a logo: ${getLogoErrorMessage(error)}`);
     } finally {
       setIsSavingLogo(false);
     }
