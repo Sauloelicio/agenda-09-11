@@ -313,6 +313,7 @@ export const PublicBooking = () => {
     : [];
 
   const handleBooking = async () => {
+    if (isBooked) return;
     if (!remoteCanBook) {
       toast.error('O período gratuito desta agenda terminou. O proprietário precisa escolher um plano.');
       return;
@@ -400,7 +401,7 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
     // Redirect to WhatsApp
     setTimeout(() => {
       window.open(whatsappUrl, '_blank');
-    }, 600);
+    }, 1400);
   };
 
   // Appointments for the current client's phone lookup
@@ -486,7 +487,7 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
 
       {/* Main Booking Container */}
       <main className="container mx-auto px-4 pt-6 max-w-xl">
-        <Card className="border-border shadow-xl backdrop-blur-xs">
+        <Card className="relative overflow-hidden border-border shadow-xl backdrop-blur-xs">
           <CardHeader className="text-center pb-3">
             <CardTitle className="text-xl flex items-center justify-center gap-2">
               <CalendarIcon className="h-5 w-5 text-primary" />
@@ -707,6 +708,7 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
             <Button
               className="w-full h-12 text-base font-bold shadow-lg shadow-primary/25 gap-2"
               disabled={
+                isBooked ||
                 !remoteCanBook ||
                 !clientName.trim() ||
                 !clientPhone.trim() ||
@@ -715,8 +717,12 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
               }
               onClick={handleBooking}
             >
-              <MessageSquare className="h-5 w-5" />
-              Confirmar Agendamento pelo WhatsApp
+              {isBooked ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : (
+                <MessageSquare className="h-5 w-5" />
+              )}
+              {isBooked ? 'Agendamento confirmado' : 'Confirmar Agendamento pelo WhatsApp'}
             </Button>
 
             {/* Reagendar / Cancelar lookup dialog */}
@@ -795,6 +801,36 @@ Te esperamos ${isDayMode ? 'no dia' : 'no horário'} marcado! 🤍`;
               </Dialog>
             </div>
           </CardContent>
+
+          {isBooked && selectedService && selectedDate && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="absolute inset-0 z-10 flex items-center justify-center bg-card/95 p-6 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-300"
+            >
+              <div className="w-full max-w-sm space-y-4 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary shadow-sm animate-in zoom-in-50 duration-500">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-foreground">Agendamento confirmado!</p>
+                  <p className="text-sm text-muted-foreground">
+                    Sua reserva foi realizada com sucesso.
+                  </p>
+                </div>
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground space-y-1">
+                  <p className="font-semibold text-foreground">{selectedService.name}</p>
+                  <p>
+                    {format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
+                    {isDayMode ? ' (dia inteiro)' : selectedTime ? ` às ${selectedTime}` : ''}
+                  </p>
+                </div>
+                <p className="text-xs text-muted-foreground animate-pulse">
+                  Abrindo o WhatsApp...
+                </p>
+              </div>
+            </div>
+          )}
         </Card>
       </main>
     </div>
