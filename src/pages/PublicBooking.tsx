@@ -272,6 +272,16 @@ export const PublicBooking = () => {
     };
   }, [findPublicAppointments, isRemoteTenant, lookupPhone, tenant]);
 
+  // Este efeito precisa ficar antes de qualquer retorno antecipado:
+  // hooks pulados em um render e chamados no seguinte geram o erro #310 do React.
+  useEffect(() => {
+    return () => {
+      if (bookedTimeoutRef.current !== null) {
+        window.clearTimeout(bookedTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (remotePageLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -312,14 +322,6 @@ export const PublicBooking = () => {
         professionalId: selectedProId || undefined,
       })
     : [];
-
-  useEffect(() => {
-    return () => {
-      if (bookedTimeoutRef.current !== null) {
-        window.clearTimeout(bookedTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleBooking = async () => {
     if (isBooked) return;
